@@ -13,7 +13,7 @@ SED=sed
 # check for [release] [force] and [enterprise] string in the commit comment
 FORCE=${FORCE:-$(git show -s --format='%s' | $SED -rn 's/.*\[(force)\].*/\1/p')}
 RELEASE=${RELEASE:-$(git show -s --format='%s' | $SED -rn 's/.*\[(release)\].*/\1/p')}
-REMOTE=https://$GITHUB_TOKEN:x-oauth-basic@github.com/seqeralabs/nf-tower-cloud.git
+REMOTE=https://oauth:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git
 
 if [[ $RELEASE ]]; then
   TAG=v$(cat VERSION)

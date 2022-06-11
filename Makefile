@@ -1,6 +1,6 @@
 repo = public.ecr.aws/seqera-labs
-version = 11.0.14
-image = nf-jdk:corretto-${version}_2
+version = $(shell cat VERSION)
+image = nf-jdk:corretto-${version}
 
 all: build push
 
