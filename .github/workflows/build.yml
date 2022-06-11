@@ -28,6 +28,7 @@ jobs:
       run: make build
 
     - name: Push images
+      if: "contains(github.event.head_commit.message, '[release]')"
       run: ./tag-and-push.sh
       env:
         AWS_ACCESS_KEY_ID: ${{secrets.TOWER_CI_AWS_ACCESS}}
