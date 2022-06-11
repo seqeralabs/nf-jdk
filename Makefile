@@ -1,6 +1,6 @@
 repo = public.ecr.aws/seqera-labs
-version = 11.0.14
-image = nf-jdk:corretto-${version}_2
+version = $(shell cat VERSION)
+image = nf-jdk:corretto-${version}
 
 all: build push
 
@@ -15,7 +15,7 @@ build:
 
 push:
 	echo "++ Pushing: ${repo}/${image}"
-	aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 195996028523.dkr.ecr.eu-west-1.amazonaws.com
+	aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/seqera-labs
 	docker push ${repo}/${image}
 	echo "++ Pushing: quay.io/seqeralabs/${image}"
 	docker tag ${repo}/${image} quay.io/seqeralabs/${image}
