@@ -9,9 +9,7 @@ on:
     tags-ignore:
       - '*'  
 
-permissions:
-  id-token: write
-  contents: read
+permissions: read-all|write-all
 
 jobs:
   build-backend:
