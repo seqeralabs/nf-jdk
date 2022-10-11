@@ -12,7 +12,8 @@ build:
 	 build \
 	 --platform linux/amd64 \
 	 -o type=docker \
-	 --build-arg VERSION=${version} USERNAME=${username} USER_UID=${useruid} USER_GID=${usergid} \
+	 --build-arg VERSION=${version} --build-arg USERNAME=${username} \
+	 --build-arg USER_UID=${useruid} --build-arg USER_GID=${usergid} \
 	 -t ${repo}/${image} \
 	 .
 
