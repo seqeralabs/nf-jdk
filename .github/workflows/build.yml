@@ -31,7 +31,7 @@ jobs:
         aws-region: ${{env.AWS_DEFAULT_REGION}}
 
     - name: Environment
-      run: env | sort 
+      run: env | sort
 
     - name: Checkout
       uses: actions/checkout@v1
