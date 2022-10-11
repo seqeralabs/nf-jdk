@@ -21,6 +21,7 @@ jobs:
 
     env:
       AWS_DEFAULT_REGION: eu-west-1
+      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
     steps:
     - name: Configure AWS Credentials
@@ -43,4 +44,4 @@ jobs:
 
     - name: Push images
       if: "contains(github.event.head_commit.message, '[release]')"
-      run: GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}" ./tag-and-push.sh
+      run: ./tag-and-push.sh
