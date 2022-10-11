@@ -9,15 +9,30 @@ on:
     tags-ignore:
       - '*'  
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   build-backend:
     name: nf-jdk build
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    env:
+      AWS_DEFAULT_REGION: eu-west-1
+      GITHUB_TOKEN: ${{ github.token }}
+
     steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::195996028523:role/Management
+        role-session-name: Management
+        aws-region: ${{env.AWS_DEFAULT_REGION}}
+
     - name: Environment
-      run: env | sort 
+      run: env | sort
 
     - name: Checkout
       uses: actions/checkout@v1
@@ -29,7 +44,4 @@ jobs:
 
     - name: Push images
       if: "contains(github.event.head_commit.message, '[release]')"
-      run: GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}" ./tag-and-push.sh
-      env:
-        AWS_ACCESS_KEY_ID: ${{secrets.TOWER_CI_AWS_ACCESS}}
-        AWS_SECRET_ACCESS_KEY: ${{secrets.TOWER_CI_AWS_SECRET}}
+      run: ./tag-and-push.sh
