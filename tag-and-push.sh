@@ -16,15 +16,15 @@ RELEASE=${RELEASE:-$(git show -s --format='%s' | $SED -rn 's/.*\[(release)\].*/\
 REMOTE=https://oauth:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git
 
 if [[ $RELEASE ]]; then
-  TAG=v$(cat VERSION)
-  [[ $FORCE == 'force' ]] && FORCE='-f'
+  # TAG=v$(cat VERSION)
+  # [[ $FORCE == 'force' ]] && FORCE='-f'
 
-   # tag repo
-  COMMIT_ID=$(git rev-parse --short HEAD)
-  TAG=${TAG}_${COMMIT_ID}
+  #  # tag repo
+  # COMMIT_ID=$(git rev-parse --short HEAD)
+  # TAG=${TAG}_${COMMIT_ID}
 
-  git tag $TAG $FORCE
-  git push $REMOTE $TAG $FORCE
+  # git tag $TAG $FORCE
+  # git push $REMOTE $TAG $FORCE
 
   # push images
   make push
