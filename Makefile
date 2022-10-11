@@ -1,9 +1,6 @@
 repo = public.ecr.aws/seqera-labs
 version = $(shell cat VERSION)
 image = nf-jdk:corretto-${version}
-username = "non-root"
-useruid = 1000
-usergid = 1000
 
 all: build push
 
@@ -12,8 +9,7 @@ build:
 	 build \
 	 --platform linux/amd64 \
 	 -o type=docker \
-	 --build-arg VERSION=${version} --build-arg USERNAME=${username} \
-	 --build-arg USER_UID=${useruid} --build-arg USER_GID=${usergid} \
+	 --build-arg VERSION=${version} \
 	 -t ${repo}/${image} \
 	 .
 
