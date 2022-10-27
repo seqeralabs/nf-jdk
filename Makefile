@@ -1,4 +1,4 @@
-repo = public.ecr.aws/seqera-labs
+repo = cr.seqera.io/public
 version = $(shell cat VERSION)
 image = nf-jdk:corretto-${version}
 
