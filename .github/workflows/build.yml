@@ -36,8 +36,8 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: "cr.seqera.io"
-        username: ${{ secret.SEQERA_CR_USERNAME }}
-        password: ${{ secret.SEQERA_CR_PASSWORD }}
+        username: ${{ secrets.SEQERA_CR_USERNAME }}
+        password: ${{ secrets.SEQERA_CR_PASSWORD }}
 
     - name: Build image
       run: make build
