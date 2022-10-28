@@ -1,4 +1,4 @@
-repo = public.ecr.aws/seqera-labs
+repo = cr.seqera.io/public
 version = $(shell cat VERSION)
 image = nf-jdk:corretto-${version}
 
@@ -15,6 +15,5 @@ build:
 
 push:
 	echo "++ Pushing: ${repo}/${image}"
-	aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/seqera-labs
 	docker push ${repo}/${image}
 
