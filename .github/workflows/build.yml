@@ -21,7 +21,6 @@ jobs:
 
     env:
       GITHUB_TOKEN: ${{ github.token }}
-      REGISTRY: "cr.seqera.io/public"
 
     steps:
 
@@ -36,8 +35,8 @@ jobs:
     - name: Docker Login 
       uses: docker/login-action@v2
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ SEQERA_CR_USERNAME }}
+        registry: "cr.seqera.io"
+        username: ${{ secret.SEQERA_CR_USERNAME }}
         password: ${{ secret.SEQERA_CR_PASSWORD }}
 
     - name: Build image
