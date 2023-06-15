@@ -1,6 +1,6 @@
 repo = cr.seqera.io/public
 version = $(shell cat VERSION)
-image = nf-jdk:corretto-${version}
+image = nf-jdk:corretto-${version}-up1
 
 all: build push
 
