@@ -1,6 +1,8 @@
 ARG VERSION
 FROM amazoncorretto:$VERSION
 
+ADD wait-for-it.sh /usr/local/bin/
+
 RUN yum update -y \
     && yum install -y tar gzip procps \
     && yum clean all \
