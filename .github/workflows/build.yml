@@ -8,6 +8,9 @@ on:
       - '!refs/tags/.*'
     tags-ignore:
       - '*'  
+  workflow_dispatch:
+    branches:
+      - master
 
 permissions:
   id-token: write
