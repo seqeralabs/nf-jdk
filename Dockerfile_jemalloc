@@ -9,7 +9,8 @@ RUN yum update -y \
 
 ## see https://technology.blog.gov.uk/2015/12/11/using-jemalloc-to-get-to-the-bottom-of-a-memory-leak/
 RUN \
-  amazon-linux-extras install -y epel && \
-  yum install -y jemalloc-devel
+  amazon-linux-extras install -y epel  \
+  && yum install -y jemalloc-devel \
+  && yum clean all
 
 ENV LD_PRELOAD=/usr/lib64/libjemalloc.so
