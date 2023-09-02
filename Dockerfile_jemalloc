@@ -1,0 +1,15 @@
+ARG VERSION
+FROM amazoncorretto:$VERSION
+
+ADD wait-for-it.sh /usr/local/bin/
+
+RUN yum update -y \
+    && yum install -y tar gzip procps which \
+    && yum clean all
+
+## see https://technology.blog.gov.uk/2015/12/11/using-jemalloc-to-get-to-the-bottom-of-a-memory-leak/
+RUN \
+  amazon-linux-extras install -y epel && \
+  yum install -y jemalloc-devel
+
+ENV LD_PRELOAD=/usr/lib64/libjemalloc.so
