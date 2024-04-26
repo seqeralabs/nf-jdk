@@ -32,5 +32,4 @@ jobs:
 
     - name: Build image
       run: make all version=$(cat VERSION_NIGHTLYBUILD)
-    - name: Push image
-      run: make push
+
