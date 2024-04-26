@@ -31,7 +31,6 @@ jobs:
         password: ${{ secrets.SEQERA_CR_PASSWORD }}
 
     - name: Build image
-      run: make build
-
+      run: make all version=$(cat VERSION_NIGHTLYBUILD)
     - name: Push image
       run: make push
