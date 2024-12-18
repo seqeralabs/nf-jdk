@@ -1,5 +1,5 @@
 ARG VERSION
-FROM amazoncorretto:$VERSION as build
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION as build
 
 RUN yum install -y bzip2 \
  && yum groupinstall -y "Development Tools"
