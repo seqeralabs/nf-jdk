@@ -1,5 +1,5 @@
 ARG VERSION
-FROM amazoncorretto:$VERSION
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
 
 ADD wait-for-it.sh /usr/local/bin/
 
