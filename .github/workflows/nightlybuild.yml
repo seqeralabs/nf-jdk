@@ -2,6 +2,7 @@ name: nf-jdk nighly build
 on:
   schedule:
     - cron: "0 1 * * *"
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -21,6 +22,9 @@ jobs:
       GITHUB_TOKEN: ${{ github.token }}
 
     steps:
+
+    - name: Environment
+      run: env | sort
 
     - name: Checkout
       uses: actions/checkout@v1
