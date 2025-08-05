@@ -31,8 +31,8 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: "cr.seqera.io"
-        username: ${{ vars.HARBOR_USERNAME }}
-        password: ${{ secrets.HARBOR_PASSWORD }}
+        username: ${{ secrets.SEQERA_CR_USERNAME }}
+        password: ${{ secrets.SEQERA_CR_PASSWORD }}
 
     - name: Build image
       run: make all version=${{ matrix.version }}
