@@ -4,6 +4,18 @@ ARG TARGETARCH
 FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
 
 ## see https://technology.blog.gov.uk/2015/12/11/using-jemalloc-to-get-to-the-bottom-of-a-memory-leak/
+# Copy the build context first to debug
+COPY . /tmp/build-context
+
+# Debug: check what's available in build context  
+RUN echo "=== TARGETARCH: ${TARGETARCH} ===" && \
+    echo "=== Build context contents ===" && \
+    ls -la /tmp/build-context/ && \
+    echo "=== jemalloc-binaries contents ===" && \
+    ls -la /tmp/build-context/jemalloc-binaries/ && \
+    echo "=== ${TARGETARCH} contents ===" && \
+    ls -la /tmp/build-context/jemalloc-binaries/${TARGETARCH}/ || echo "Directory /tmp/build-context/jemalloc-binaries/${TARGETARCH}/ not found"
+
 ADD jemalloc-binaries/${TARGETARCH} /opt/jemalloc
 
 # Install file command and debug: verify jemalloc files are copied correctly
