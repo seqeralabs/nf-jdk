@@ -8,7 +8,7 @@ ADD jemalloc-binaries/${TARGETARCH} /opt/jemalloc
 
 ENV \
   PATH=$PATH:/opt/jemalloc/bin \
-  LD_PRELOAD=/opt/jemalloc/lib/libjemalloc.so
+  LD_PRELOAD=/opt/jemalloc/lib/libjemalloc.so.2
 
 ADD wait-for-it.sh /usr/local/bin/
 
