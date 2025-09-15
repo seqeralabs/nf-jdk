@@ -2,7 +2,10 @@ repo = cr.seqera.io/public
 version = $(shell cat VERSION)
 image = nf-jdk:corretto-${version}
 
-all: build push
+all: setup-builder build push
+
+setup-builder:
+	docker buildx create --name multiarch --use --bootstrap || docker buildx use multiarch
 
 build:
 	docker buildx \
