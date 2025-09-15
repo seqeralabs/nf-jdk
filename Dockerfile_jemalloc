@@ -1,22 +1,22 @@
 ARG VERSION
-ARG TARGETARCH
+# Remove ARG TARGETARCH to let Docker set it automatically
 
 FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
 
 ## see https://technology.blog.gov.uk/2015/12/11/using-jemalloc-to-get-to-the-bottom-of-a-memory-leak/
-# Copy the build context first to debug
-COPY . /tmp/build-context
+# Copy all jemalloc binaries
+COPY jemalloc-binaries/ /tmp/jemalloc-binaries/
 
-# Debug: check what's available in build context  
+# Debug and copy the correct architecture binaries
 RUN echo "=== TARGETARCH: ${TARGETARCH} ===" && \
-    echo "=== Build context contents ===" && \
-    ls -la /tmp/build-context/ && \
-    echo "=== jemalloc-binaries contents ===" && \
-    ls -la /tmp/build-context/jemalloc-binaries/ && \
-    echo "=== ${TARGETARCH} contents ===" && \
-    ls -la /tmp/build-context/jemalloc-binaries/${TARGETARCH}/ || echo "Directory /tmp/build-context/jemalloc-binaries/${TARGETARCH}/ not found"
-
-ADD jemalloc-binaries/${TARGETARCH} /opt/jemalloc
+    echo "=== Available architectures ===" && \
+    ls -la /tmp/jemalloc-binaries/ && \
+    echo "=== Copying ${TARGETARCH} binaries ===" && \
+    mkdir -p /opt/jemalloc && \
+    cp -r /tmp/jemalloc-binaries/${TARGETARCH}/* /opt/jemalloc/ && \
+    echo "=== Verifying copy ===" && \
+    ls -la /opt/jemalloc/ && \
+    rm -rf /tmp/jemalloc-binaries
 
 # Install file command and debug: verify jemalloc files are copied correctly
 RUN yum install -y file && \
