@@ -23,17 +23,46 @@ jobs:
   build-mimalloc:
     uses: ./.github/workflows/build-mimalloc.yml
 
-  build-backend:
-    name: nf-jdk build
+  build-base:
+    name: Build base container
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: [build-jemalloc, build-mimalloc]
+    timeout-minutes: 20
 
     env:
       GITHUB_TOKEN: ${{ github.token }}
 
     steps:
+    - name: Environment
+      run: env | sort
 
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Docker Login 
+      uses: docker/login-action@v2
+      with:
+        registry: "cr.seqera.io"
+        username: ${{ secrets.SEQERA_CR_USERNAME }}
+        password: ${{ secrets.SEQERA_CR_PASSWORD }}
+
+    - name: Build base image
+      run: make build-base
+
+  build-jemalloc-container:
+    name: Build jemalloc container
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-jemalloc
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
     - name: Environment
       run: env | sort
 
@@ -57,6 +86,48 @@ jobs:
         name: jemalloc-arm64
         path: jemalloc-binaries/arm64/
 
+    - name: Verify jemalloc binaries
+      run: |
+        echo "Checking jemalloc binaries..."
+        ls -la jemalloc-binaries/
+        ls -la jemalloc-binaries/amd64/ || echo "AMD64 directory empty or missing"
+        ls -la jemalloc-binaries/arm64/ || echo "ARM64 directory empty or missing"
+        echo "jemalloc AMD64 lib contents:"
+        ls -la jemalloc-binaries/amd64/lib/ || echo "No AMD64 lib directory"
+        echo "jemalloc ARM64 lib contents:"  
+        ls -la jemalloc-binaries/arm64/lib/ || echo "No ARM64 lib directory"
+
+    - name: Docker Login 
+      uses: docker/login-action@v2
+      with:
+        registry: "cr.seqera.io"
+        username: ${{ secrets.SEQERA_CR_USERNAME }}
+        password: ${{ secrets.SEQERA_CR_PASSWORD }}
+
+    - name: Build jemalloc image
+      run: make build-jemalloc
+
+  build-mimalloc-container:
+    name: Build mimalloc container
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-mimalloc
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
+    - name: Environment
+      run: env | sort
+
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Download mimalloc AMD64 artifacts
       uses: actions/download-artifact@v4
       with:
@@ -69,17 +140,8 @@ jobs:
         name: mimalloc-arm64
         path: mimalloc-binaries/arm64/
 
-    - name: Verify binary artifacts
+    - name: Verify mimalloc binaries
       run: |
-        echo "Checking jemalloc binaries..."
-        ls -la jemalloc-binaries/
-        ls -la jemalloc-binaries/amd64/ || echo "AMD64 directory empty or missing"
-        ls -la jemalloc-binaries/arm64/ || echo "ARM64 directory empty or missing"
-        echo "jemalloc AMD64 lib contents:"
-        ls -la jemalloc-binaries/amd64/lib/ || echo "No AMD64 lib directory"
-        echo "jemalloc ARM64 lib contents:"  
-        ls -la jemalloc-binaries/arm64/lib/ || echo "No ARM64 lib directory"
-        
         echo "Checking mimalloc binaries..."
         ls -la mimalloc-binaries/
         ls -la mimalloc-binaries/amd64/ || echo "AMD64 directory empty or missing"
@@ -96,9 +158,18 @@ jobs:
         username: ${{ secrets.SEQERA_CR_USERNAME }}
         password: ${{ secrets.SEQERA_CR_PASSWORD }}
 
-    - name: Build image
-      run: make build
+    - name: Build mimalloc image
+      run: make build-mimalloc
 
-    - name: Push images
-      if: "contains(github.event.head_commit.message, '[release]')"
+  post-build:
+    name: Post-build tasks
+    runs-on: ubuntu-latest
+    needs: [build-base, build-jemalloc-container, build-mimalloc-container]
+    if: "contains(github.event.head_commit.message, '[release]')"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Tag and push release
       run: ./tag-and-push.sh
