@@ -1,7 +1,9 @@
 ARG VERSION
-# Remove ARG TARGETARCH to let Docker set it automatically
 
 FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
+
+# Use built-in ARG that Docker sets automatically for multi-arch builds
+ARG TARGETARCH
 
 ## see https://technology.blog.gov.uk/2015/12/11/using-jemalloc-to-get-to-the-bottom-of-a-memory-leak/
 # Copy all jemalloc binaries
