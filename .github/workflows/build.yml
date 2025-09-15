@@ -54,6 +54,17 @@ jobs:
         name: jemalloc-arm64
         path: jemalloc-binaries/arm64/
 
+    - name: Verify jemalloc binaries
+      run: |
+        echo "Checking jemalloc binaries..."
+        ls -la jemalloc-binaries/
+        ls -la jemalloc-binaries/amd64/ || echo "AMD64 directory empty or missing"
+        ls -la jemalloc-binaries/arm64/ || echo "ARM64 directory empty or missing"
+        echo "AMD64 lib contents:"
+        ls -la jemalloc-binaries/amd64/lib/ || echo "No AMD64 lib directory"
+        echo "ARM64 lib contents:"  
+        ls -la jemalloc-binaries/arm64/lib/ || echo "No ARM64 lib directory"
+
     - name: Docker Login 
       uses: docker/login-action@v2
       with:
