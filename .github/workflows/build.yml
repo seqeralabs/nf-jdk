@@ -17,6 +17,9 @@ permissions:
   contents: write
 
 jobs:
+  build-jemalloc:
+    uses: ./.github/workflows/build-jemalloc.yml
+
   build-mimalloc:
     uses: ./.github/workflows/build-mimalloc.yml
 
@@ -24,7 +27,7 @@ jobs:
     name: nf-jdk build
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: build-mimalloc
+    needs: [build-jemalloc, build-mimalloc]
 
     env:
       GITHUB_TOKEN: ${{ github.token }}
@@ -42,6 +45,18 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
+    - name: Download jemalloc AMD64 artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: jemalloc-amd64
+        path: jemalloc-binaries/amd64/
+
+    - name: Download jemalloc ARM64 artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: jemalloc-arm64
+        path: jemalloc-binaries/arm64/
+
     - name: Download mimalloc AMD64 artifacts
       uses: actions/download-artifact@v4
       with:
@@ -54,15 +69,24 @@ jobs:
         name: mimalloc-arm64
         path: mimalloc-binaries/arm64/
 
-    - name: Verify mimalloc binaries
+    - name: Verify binary artifacts
       run: |
+        echo "Checking jemalloc binaries..."
+        ls -la jemalloc-binaries/
+        ls -la jemalloc-binaries/amd64/ || echo "AMD64 directory empty or missing"
+        ls -la jemalloc-binaries/arm64/ || echo "ARM64 directory empty or missing"
+        echo "jemalloc AMD64 lib contents:"
+        ls -la jemalloc-binaries/amd64/lib/ || echo "No AMD64 lib directory"
+        echo "jemalloc ARM64 lib contents:"  
+        ls -la jemalloc-binaries/arm64/lib/ || echo "No ARM64 lib directory"
+        
         echo "Checking mimalloc binaries..."
         ls -la mimalloc-binaries/
         ls -la mimalloc-binaries/amd64/ || echo "AMD64 directory empty or missing"
         ls -la mimalloc-binaries/arm64/ || echo "ARM64 directory empty or missing"
-        echo "AMD64 lib contents:"
+        echo "mimalloc AMD64 lib contents:"
         ls -la mimalloc-binaries/amd64/lib/ || echo "No AMD64 lib directory"
-        echo "ARM64 lib contents:"  
+        echo "mimalloc ARM64 lib contents:"  
         ls -la mimalloc-binaries/arm64/lib/ || echo "No ARM64 lib directory"
 
     - name: Docker Login 
