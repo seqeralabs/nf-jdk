@@ -1,19 +1,11 @@
 ARG VERSION
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION as build
+ARG TARGETARCH
 
-RUN yum install -y bzip2 \
- && yum groupinstall -y "Development Tools"
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
 
-RUN curl -sSL https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2 | tar -xj
-
-RUN cd jemalloc-* \
- && ./configure --enable-prof --prefix /opt/jemalloc \
- && make \
- && make install
-
-FROM amazoncorretto:$VERSION
 ## see https://technology.blog.gov.uk/2015/12/11/using-jemalloc-to-get-to-the-bottom-of-a-memory-leak/
-COPY --from=build /opt/jemalloc /opt/jemalloc
+ADD jemalloc-binaries/${TARGETARCH} /opt/jemalloc
+
 ENV \
   PATH=$PATH:/opt/jemalloc/bin \
   LD_PRELOAD=/opt/jemalloc/lib/libjemalloc.so
