@@ -1,4 +1,4 @@
-ARG VERSION
+ARG VERSION=24-al2023
 
 FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
 
