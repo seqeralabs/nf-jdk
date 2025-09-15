@@ -4,7 +4,9 @@ image = nf-jdk:corretto-${version}
 
 all: build push
 
-build:
+build: build-base build-jemalloc build-mimalloc
+
+build-base:
 	docker buildx \
 	 build \
 	 --no-cache \
@@ -15,6 +17,7 @@ build:
 	 --push \
 	 .
 
+build-jemalloc:
 	docker buildx \
 	 build \
 	 --no-cache \
@@ -22,6 +25,17 @@ build:
 	 --build-arg VERSION=${version} \
 	 -t ${repo}/${image}-jemalloc \
 	 -f Dockerfile_jemalloc \
+	 --push \
+	 .
+
+build-mimalloc:
+	docker buildx \
+	 build \
+	 --no-cache \
+	 --platform linux/amd64,linux/arm64 \
+	 --build-arg VERSION=${version} \
+	 -t ${repo}/${image}-mimalloc \
+	 -f Dockerfile_mimalloc \
 	 --push \
 	 .
 

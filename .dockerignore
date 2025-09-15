@@ -1,3 +1,4 @@
 *
 !wait-for-it.sh
 !jemalloc-binaries/
+!mimalloc-binaries/
