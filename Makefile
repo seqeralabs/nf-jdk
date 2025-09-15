@@ -8,25 +8,23 @@ build:
 	docker buildx \
 	 build \
 	 --no-cache \
-	 --platform linux/amd64 \
-	 -o type=docker \
+	 --platform linux/amd64,linux/arm64 \
 	 --build-arg VERSION=${version} \
 	 -t ${repo}/${image} \
 	 -f Dockerfile \
+	 --push \
 	 .
 
 	docker buildx \
 	 build \
 	 --no-cache \
-	 --platform linux/amd64 \
-	 -o type=docker \
+	 --platform linux/amd64,linux/arm64 \
 	 --build-arg VERSION=${version} \
 	 -t ${repo}/${image}-jemalloc \
 	 -f Dockerfile_jemalloc \
+	 --push \
 	 .
 
 push:
-	echo "++ Pushing: ${repo}/${image}"
-	docker push ${repo}/${image}
-	docker push ${repo}/${image}-jemalloc
+	echo "++ Multi-arch images already pushed during build"
 
