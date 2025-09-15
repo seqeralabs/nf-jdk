@@ -6,8 +6,9 @@ FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
 ## see https://technology.blog.gov.uk/2015/12/11/using-jemalloc-to-get-to-the-bottom-of-a-memory-leak/
 ADD jemalloc-binaries/${TARGETARCH} /opt/jemalloc
 
-# Debug: verify jemalloc files are copied correctly
-RUN echo "=== DEBUG: Checking jemalloc installation ===" && \
+# Install file command and debug: verify jemalloc files are copied correctly
+RUN yum install -y file && \
+    echo "=== DEBUG: Checking jemalloc installation ===" && \
     ls -la /opt/jemalloc/ && \
     echo "=== /opt/jemalloc/lib/ contents ===" && \
     ls -la /opt/jemalloc/lib/ && \
