@@ -41,51 +41,41 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 
 ## Workflow Structure
 
-### Main Build (.github/workflows/build.yml)
+### Unified Build (.github/workflows/build.yml)
+
+**Triggers:**
+- **Schedule**: Daily at 1:00 AM UTC (cron: "0 1 * * *")
+- **Manual**: workflow_dispatch for on-demand builds
+- **No push builds**: Removed automatic builds on code pushes
 
 **Execution Flow:**
-1. **Parallel Binary Builds**: 
-   - `build-jemalloc` workflow → builds AMD64/ARM64 jemalloc binaries
-   - `build-mimalloc` workflow → builds AMD64/ARM64 mimalloc binaries
+1. **Parallel Binary Builds** (inline jobs):
+   - `build-jemalloc-amd64`: Builds AMD64 jemalloc binaries
+   - `build-mimalloc-amd64`: Builds AMD64 mimalloc binaries
+   - `build-mimalloc-arm64`: Builds ARM64 mimalloc binaries
 
-2. **Parallel Container Builds**:
-   - `build-base`: Independent base container
-   - `build-jemalloc-container`: Uses jemalloc artifacts
-   - `build-mimalloc-container`: Uses mimalloc artifacts
+2. **Parallel Container Matrix Builds**:
+   - `build-base`: Matrix job (3 versions) - independent base containers
+   - `build-jemalloc-container`: Matrix job (3 versions) - uses AMD64 jemalloc artifacts
+   - `build-mimalloc-container`: Matrix job (3 versions) - uses AMD64/ARM64 mimalloc artifacts
 
-3. **Post-build**: Release tasks (if commit contains `[release]`)
-
-### Binary Build Workflows
-
-- **build-jemalloc.yml**: Compiles jemalloc 5.3.0 natively for AMD64 only
-- **build-mimalloc.yml**: Compiles mimalloc 2.1.7 natively for both architectures
-- **Artifacts**: 1-day retention, consumed by container builds
-
-### Nightly Builds (.github/workflows/nightlybuild.yml)
-
-- **Schedule**: Daily at 1:00 AM UTC
-- **Matrix**: Java versions 17-al2023, 21-al2023, 25-al2023 (all three variants: base, jemalloc, mimalloc)
-- **Version Source**: Hardcoded matrix in workflow
-- **Structure**: Matches main build.yml with separate jobs for each container variant
-- **Architecture**: Base and mimalloc support AMD64/ARM64, jemalloc is AMD64-only
-- **Release**: Implicit release behavior - all nightly builds are automatically tagged
+**Matrix Strategy:**
+- **Versions**: ['17-al2023', '21-al2023', '25-al2023']
+- **Total Builds**: 9 container images per run (3 versions × 3 variants)
+- **Architecture Support**: Base and mimalloc multi-arch, jemalloc AMD64-only
 
 ## Release Process
 
-### Automated Release (tag-and-push.sh)
-
-**Trigger**: Commit message contains `[release]`
-**Process**:
-1. Extract version from `VERSION` file
-2. Create Git tag: `v{VERSION}_{COMMIT_ID}`
-3. Push tag to repository
-
-**Force Release**: Use `[force release]` to override existing tags
+### Container Image Publishing
+- **Automatic**: Images are pushed during build with `--push` flag
+- **No Git tagging**: Removed tag-and-push.sh script and post-build jobs
+- **Registry**: cr.seqera.io/public
+- **Image naming**: nf-jdk:corretto-{version}[-jemalloc|-mimalloc]
 
 ### Version Management
 
-- **Production**: `VERSION` file (currently: 25-al2023)
-- **Nightly**: Hardcoded matrix in workflow (17-al2023, 21-al2023, 25-al2023)
+- **Unified Matrix**: ['17-al2023', '21-al2023', '25-al2023'] hardcoded in workflow
+- **No VERSION file dependency**: All versions specified directly in workflow
 
 ## Development Commands
 
@@ -99,15 +89,14 @@ make build-jemalloc
 make build-mimalloc
 ```
 
-### Release Process
+### Manual Builds
 ```bash
-# Create release (add [release] to commit message)
-git commit -m "Update feature [release]"
-git push
+# Trigger build workflow manually via GitHub Actions UI
+# or using GitHub CLI:
+gh workflow run build.yml
 
-# Force release (override existing tag)
-git commit -m "Hotfix [force release]"
-git push
+# Check workflow status
+gh run list --workflow=build.yml --limit=5
 ```
 
 ## Key Dependencies
