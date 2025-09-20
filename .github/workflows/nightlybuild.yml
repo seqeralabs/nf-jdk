@@ -9,11 +9,77 @@ permissions:
   contents: write
 
 jobs:
-  build-jemalloc:
-    uses: ./.github/workflows/build-jemalloc.yml
+  build-jemalloc-amd64:
+    name: Build jemalloc for AMD64 (nightly)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential curl bzip2
+        
+    - name: Build jemalloc for AMD64
+      run: ./build-jemalloc-native.sh amd64
+      
+    - name: Upload AMD64 artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: jemalloc-amd64
+        path: jemalloc-binaries/amd64/
+        retention-days: 1
 
-  build-mimalloc:
-    uses: ./.github/workflows/build-mimalloc.yml
+  build-mimalloc-amd64:
+    name: Build mimalloc for AMD64 (nightly)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential curl bzip2
+        
+    - name: Build mimalloc for AMD64
+      run: ./build-mimalloc-native.sh amd64
+      
+    - name: Upload AMD64 artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: mimalloc-amd64
+        path: mimalloc-binaries/amd64/
+        retention-days: 1
+
+  build-mimalloc-arm64:
+    name: Build mimalloc for ARM64 (nightly)
+    runs-on: ubuntu-24.04-arm64
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential curl bzip2
+        
+    - name: Build mimalloc for ARM64
+      run: ./build-mimalloc-native.sh arm64
+      
+    - name: Upload ARM64 artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: mimalloc-arm64
+        path: mimalloc-binaries/arm64/
+        retention-days: 1
 
   build-base-nightly:
     strategy:
@@ -57,7 +123,7 @@ jobs:
     name: Build jemalloc container (nightly)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: build-jemalloc
+    needs: build-jemalloc-amd64
 
     env:
       GITHUB_TOKEN: ${{ github.token }}
@@ -106,7 +172,7 @@ jobs:
     name: Build mimalloc container (nightly)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: build-mimalloc
+    needs: [build-mimalloc-amd64, build-mimalloc-arm64]
 
     env:
       GITHUB_TOKEN: ${{ github.token }}
