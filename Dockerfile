@@ -1,4 +1,4 @@
-ARG VERSION=24-al2023
+ARG VERSION
 FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
 
 ADD wait-for-it.sh /usr/local/bin/
