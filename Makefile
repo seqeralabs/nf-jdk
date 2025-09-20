@@ -4,29 +4,41 @@ image = nf-jdk:corretto-${version}
 
 all: build push
 
-build:
+build: build-base build-jemalloc build-mimalloc
+
+build-base:
 	docker buildx \
 	 build \
 	 --no-cache \
-	 --platform linux/amd64 \
-	 -o type=docker \
+	 --platform linux/amd64,linux/arm64 \
 	 --build-arg VERSION=${version} \
 	 -t ${repo}/${image} \
 	 -f Dockerfile \
+	 --push \
 	 .
 
+build-jemalloc:
 	docker buildx \
 	 build \
 	 --no-cache \
 	 --platform linux/amd64 \
-	 -o type=docker \
 	 --build-arg VERSION=${version} \
 	 -t ${repo}/${image}-jemalloc \
 	 -f Dockerfile_jemalloc \
+	 --push \
+	 .
+
+build-mimalloc:
+	docker buildx \
+	 build \
+	 --no-cache \
+	 --platform linux/amd64,linux/arm64 \
+	 --build-arg VERSION=${version} \
+	 -t ${repo}/${image}-mimalloc \
+	 -f Dockerfile_mimalloc \
+	 --push \
 	 .
 
 push:
-	echo "++ Pushing: ${repo}/${image}"
-	docker push ${repo}/${image}
-	docker push ${repo}/${image}-jemalloc
+	echo "++ Multi-arch images already pushed during build"
 

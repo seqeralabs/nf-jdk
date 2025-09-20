@@ -1,0 +1,42 @@
+ARG VERSION
+
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
+
+# Use built-in ARG that Docker sets automatically for multi-arch builds
+ARG TARGETARCH
+
+## see https://github.com/microsoft/mimalloc
+# Copy all mimalloc binaries
+COPY mimalloc-binaries/ /tmp/mimalloc-binaries/
+
+# Debug and copy the correct architecture binaries
+RUN echo "=== TARGETARCH: ${TARGETARCH} ===" && \
+    echo "=== Available architectures ===" && \
+    ls -la /tmp/mimalloc-binaries/ && \
+    echo "=== Copying ${TARGETARCH} binaries ===" && \
+    mkdir -p /opt/mimalloc && \
+    cp -r /tmp/mimalloc-binaries/${TARGETARCH}/* /opt/mimalloc/ && \
+    echo "=== Verifying copy ===" && \
+    ls -la /opt/mimalloc/ && \
+    rm -rf /tmp/mimalloc-binaries
+
+# Install file command and debug: verify mimalloc files are copied correctly
+RUN yum install -y file && \
+    echo "=== DEBUG: Checking mimalloc installation ===" && \
+    ls -la /opt/mimalloc/ && \
+    echo "=== /opt/mimalloc/lib/ contents ===" && \
+    ls -la /opt/mimalloc/lib/ && \
+    echo "=== File info for libmimalloc.so.2.1 ===" && \
+    file /opt/mimalloc/lib/libmimalloc.so.2.1 && \
+    echo "=== Architecture info ===" && \
+    uname -m
+
+ENV \
+  PATH=$PATH:/opt/mimalloc/bin \
+  LD_PRELOAD=/opt/mimalloc/lib/libmimalloc.so.2.1
+
+ADD wait-for-it.sh /usr/local/bin/
+
+RUN yum update -y \
+    && yum install -y tar gzip procps which \
+    && yum clean all

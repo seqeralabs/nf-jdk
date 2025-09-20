@@ -1,22 +1,39 @@
 ARG VERSION
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION as build
 
-RUN yum install -y bzip2 \
- && yum groupinstall -y "Development Tools"
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:$VERSION
 
-RUN curl -sSL https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2 | tar -xj
+# Use built-in ARG that Docker sets automatically for multi-arch builds
+ARG TARGETARCH
 
-RUN cd jemalloc-* \
- && ./configure --enable-prof --prefix /opt/jemalloc \
- && make \
- && make install
-
-FROM amazoncorretto:$VERSION
 ## see https://technology.blog.gov.uk/2015/12/11/using-jemalloc-to-get-to-the-bottom-of-a-memory-leak/
-COPY --from=build /opt/jemalloc /opt/jemalloc
+# Copy all jemalloc binaries
+COPY jemalloc-binaries/ /tmp/jemalloc-binaries/
+
+# Debug and copy the correct architecture binaries
+RUN echo "=== TARGETARCH: ${TARGETARCH} ===" && \
+    echo "=== Available architectures ===" && \
+    ls -la /tmp/jemalloc-binaries/ && \
+    echo "=== Copying ${TARGETARCH} binaries ===" && \
+    mkdir -p /opt/jemalloc && \
+    cp -r /tmp/jemalloc-binaries/${TARGETARCH}/* /opt/jemalloc/ && \
+    echo "=== Verifying copy ===" && \
+    ls -la /opt/jemalloc/ && \
+    rm -rf /tmp/jemalloc-binaries
+
+# Install file command and debug: verify jemalloc files are copied correctly
+RUN yum install -y file && \
+    echo "=== DEBUG: Checking jemalloc installation ===" && \
+    ls -la /opt/jemalloc/ && \
+    echo "=== /opt/jemalloc/lib/ contents ===" && \
+    ls -la /opt/jemalloc/lib/ && \
+    echo "=== File info for libjemalloc.so.2 ===" && \
+    file /opt/jemalloc/lib/libjemalloc.so.2 && \
+    echo "=== Architecture info ===" && \
+    uname -m
+
 ENV \
   PATH=$PATH:/opt/jemalloc/bin \
-  LD_PRELOAD=/opt/jemalloc/lib/libjemalloc.so
+  LD_PRELOAD=/opt/jemalloc/lib/libjemalloc.so.2
 
 ADD wait-for-it.sh /usr/local/bin/
 
