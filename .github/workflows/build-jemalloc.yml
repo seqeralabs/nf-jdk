@@ -34,26 +34,3 @@ jobs:
         path: jemalloc-binaries/amd64/
         retention-days: 1
 
-  build-jemalloc-arm64:
-    name: Build jemalloc for ARM64
-    runs-on: ubuntu-24.04-arm64
-    timeout-minutes: 20
-    
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      
-    - name: Install build dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential curl bzip2
-        
-    - name: Build jemalloc for ARM64
-      run: ./build-jemalloc-native.sh arm64
-      
-    - name: Upload ARM64 artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: jemalloc-arm64
-        path: jemalloc-binaries/arm64/
-        retention-days: 1

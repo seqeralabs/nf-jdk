@@ -21,7 +21,7 @@ build-jemalloc:
 	docker buildx \
 	 build \
 	 --no-cache \
-	 --platform linux/amd64,linux/arm64 \
+	 --platform linux/amd64 \
 	 --build-arg VERSION=${version} \
 	 -t ${repo}/${image}-jemalloc \
 	 -f Dockerfile_jemalloc \
