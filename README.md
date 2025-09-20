@@ -1,6 +1,6 @@
 # nf-jdk
 
-Multi-architecture Java JDK containers optimized with different memory allocators for backend execution in the Nextflow ecosystem.
+Multi-architecture Java JDK containers optimized with different memory allocators for backend execution in the Seqera ecosystem.
 
 ## Container Variants
 
@@ -151,4 +151,4 @@ For detailed technical information, build system architecture, and development g
 - [Microsoft mimalloc](https://github.com/microsoft/mimalloc)  
 - [Facebook Buck2 ARM64 Issue](https://github.com/facebook/buck2/issues/91)
 - [Amazon Corretto](https://aws.amazon.com/corretto/)
-- [Nextflow](https://www.nextflow.io/)
+- [Seqera](https://www.seqera.io/)
