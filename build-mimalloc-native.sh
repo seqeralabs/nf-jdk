@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-MIMALLOC_VERSION="2.1.7"
+MIMALLOC_VERSION="2.2.4"
 ARCH="${1:-$(uname -m)}"
 
 case $ARCH in
@@ -60,7 +60,7 @@ cp -r "$(pwd)/install/opt/mimalloc"/* "../../../mimalloc-binaries/${TARGET_ARCH}
 # Verify the build
 echo "Verifying build..."
 ls -la "../../../mimalloc-binaries/${TARGET_ARCH}/"
-file "../../../mimalloc-binaries/${TARGET_ARCH}/lib/libmimalloc.so.2.1"
+file "../../../mimalloc-binaries/${TARGET_ARCH}/lib/libmimalloc.so.2.2"
 
 echo "mimalloc ${MIMALLOC_VERSION} built successfully for ${TARGET_ARCH}"
 echo "Binaries available in: mimalloc-binaries/${TARGET_ARCH}/"

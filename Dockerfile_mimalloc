@@ -26,14 +26,14 @@ RUN yum install -y file && \
     ls -la /opt/mimalloc/ && \
     echo "=== /opt/mimalloc/lib/ contents ===" && \
     ls -la /opt/mimalloc/lib/ && \
-    echo "=== File info for libmimalloc.so.2.1 ===" && \
-    file /opt/mimalloc/lib/libmimalloc.so.2.1 && \
+    echo "=== File info for libmimalloc.so.2.2 ===" && \
+    file /opt/mimalloc/lib/libmimalloc.so.2.2 && \
     echo "=== Architecture info ===" && \
     uname -m
 
 ENV \
   PATH=$PATH:/opt/mimalloc/bin \
-  LD_PRELOAD=/opt/mimalloc/lib/libmimalloc.so.2.1
+  LD_PRELOAD=/opt/mimalloc/lib/libmimalloc.so.2.2
 
 ADD wait-for-it.sh /usr/local/bin/
 
