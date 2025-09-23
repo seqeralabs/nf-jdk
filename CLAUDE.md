@@ -15,8 +15,8 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 
 2. **Jemalloc Container** (`Dockerfile_jemalloc`)
    - Image: `nf-jdk:corretto-{version}-jemalloc`
-   - Pre-compiled jemalloc 5.3.0 binaries for AMD64 only
-   - Environment: `LD_PRELOAD=/opt/jemalloc/lib/libjemalloc.so.2`
+   - Amazon Linux 2023 jemalloc package with native ARM64/AMD64 support
+   - Environment: `LD_PRELOAD=/usr/lib64/libjemalloc.so.2`
 
 3. **Mimalloc Container** (`Dockerfile_mimalloc`)
    - Image: `nf-jdk:corretto-{version}-mimalloc`
@@ -27,7 +27,8 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 
 - **Architectures**: linux/amd64, linux/arm64
 - **Build Method**: Docker Buildx with multi-platform support
-- **Native Compilation**: Memory allocators compiled natively on respective architectures
+- **Jemalloc**: Uses AL2023 package manager (native ARM64/AMD64 support)
+- **Mimalloc**: Native compilation on respective architectures
 - **Runners**: `ubuntu-latest` (AMD64), `ubuntu-24.04-arm64` (ARM64)
 
 ## Build Targets (Makefile)
@@ -50,19 +51,18 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 
 **Execution Flow:**
 1. **Parallel Binary Builds** (inline jobs):
-   - `build-jemalloc-amd64`: Builds AMD64 jemalloc binaries
    - `build-mimalloc-amd64`: Builds AMD64 mimalloc binaries
    - `build-mimalloc-arm64`: Builds ARM64 mimalloc binaries
 
 2. **Parallel Container Matrix Builds**:
    - `build-base`: Matrix job (3 versions) - independent base containers
-   - `build-jemalloc-container`: Matrix job (3 versions) - uses AMD64 jemalloc artifacts
+   - `build-jemalloc-container`: Matrix job (3 versions) - uses AL2023 package manager
    - `build-mimalloc-container`: Matrix job (3 versions) - uses AMD64/ARM64 mimalloc artifacts
 
 **Matrix Strategy:**
 - **Versions**: ['17-al2023', '21-al2023', '25-al2023']
 - **Total Builds**: 9 container images per run (3 versions × 3 variants)
-- **Architecture Support**: Base and mimalloc multi-arch, jemalloc AMD64-only
+- **Architecture Support**: All variants support multi-arch (AMD64/ARM64)
 
 ## Release Process
 
@@ -108,8 +108,8 @@ gh run list --workflow=build.yml --limit=5
 
 ## Performance Optimizations
 
-1. **Multi-Stage Builds**: Separate binary compilation and container assembly
-2. **Artifact Caching**: Binary artifacts cached between workflows
+1. **Package Manager Integration**: Jemalloc uses AL2023 native packages (no compilation needed)
+2. **Binary Artifact Caching**: Mimalloc binaries cached between workflows
 3. **Parallel Execution**: Independent builds run concurrently
-4. **Native Compilation**: Architecture-specific binary building
+4. **Native Compilation**: Mimalloc compiled natively for each architecture
 5. **Docker Layer Caching**: Buildx optimization for multi-platform builds
