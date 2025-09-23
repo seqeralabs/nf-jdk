@@ -14,8 +14,8 @@ This project builds three types of Java containers, each optimized for different
 
 ### ⚡ Jemalloc Container  
 - **Image**: `nf-jdk:corretto-{version}-jemalloc`
-- **Architecture**: AMD64 only
-- **Memory Allocator**: [jemalloc 5.3.0](https://github.com/jemalloc/jemalloc)
+- **Architecture**: AMD64, ARM64
+- **Memory Allocator**: [jemalloc 5.2.1](https://github.com/jemalloc/jemalloc) (Amazon Linux 2023 package)
 - **Use Case**: High-performance applications with intensive memory allocation
 
 ### 🚀 Mimalloc Container
@@ -29,7 +29,7 @@ This project builds three types of Java containers, each optimized for different
 | Variant  | AMD64 | ARM64 | Notes                           |
 |----------|-------|-------|---------------------------------|
 | Base     | ✅     | ✅     | Standard Java runtime           |
-| Jemalloc | ✅     | ❌     | AMD64 only (see ARM64 issues)   |
+| Jemalloc | ✅     | ✅     | Multi-arch via AL2023 package  |
 | Mimalloc | ✅     | ✅     | Full multi-architecture support |
 
 ## Available Versions
@@ -53,7 +53,7 @@ docker pull cr.seqera.io/public/nf-jdk:corretto-25-al2023
 docker pull cr.seqera.io/public/nf-jdk:corretto-21-al2023
 docker pull cr.seqera.io/public/nf-jdk:corretto-17-al2023
 
-# Pull jemalloc-optimized containers (AMD64 only)
+# Pull jemalloc-optimized containers (multi-architecture)
 docker pull cr.seqera.io/public/nf-jdk:corretto-25-al2023-jemalloc
 docker pull cr.seqera.io/public/nf-jdk:corretto-21-al2023-jemalloc
 docker pull cr.seqera.io/public/nf-jdk:corretto-17-al2023-jemalloc
@@ -64,27 +64,34 @@ docker pull cr.seqera.io/public/nf-jdk:corretto-21-al2023-mimalloc
 docker pull cr.seqera.io/public/nf-jdk:corretto-17-al2023-mimalloc
 ```
 
-## ARM64 and Jemalloc Compatibility Issues
+## Jemalloc Multi-Architecture Support
 
-### The Problem
+### Amazon Linux 2023 Package Approach
 
-Jemalloc has fundamental compatibility issues with ARM64 architectures, particularly Apple Silicon (M-series chips). As documented in [Facebook Buck2 issue #91](https://github.com/facebook/buck2/issues/91), the core problems are:
+This project uses the **Amazon Linux 2023 jemalloc package** instead of custom compilation, which provides several benefits:
 
-1. **Page Size ABI Binding**: Jemalloc compiles the host system's memory page size directly into the library ABI
-2. **Cross-Platform Incompatibility**: Binaries built on 4k page systems (traditional x86/ARM) crash when run on 16k page systems (Apple Silicon)
-3. **Runtime Failures**: Applications simply crash rather than gracefully handling the incompatibility
+#### ✅ **Native ARM64 Compatibility**
+- AWS has configured jemalloc with appropriate page size settings for ARM64
+- Optimized for Graviton processors with proper page size handling
+- No custom compilation or cross-platform compatibility issues
 
-### Facebook's Recommendation
+#### ✅ **Simplified Build Process**
+- Uses standard package manager installation (`yum install jemalloc`)
+- Eliminates complex binary compilation and artifact management
+- Reduced build time and fewer potential failure points
 
-Facebook's Buck2 team recommends **turning off jemalloc for ARM64 platforms** entirely, which is exactly what this project implements.
+#### ✅ **Security and Maintenance**
+- Officially maintained and regularly updated by AWS
+- Security patches automatically included in package updates
+- Consistent with Amazon Linux 2023 ecosystem optimizations
 
-### The Mimalloc Alternative
+### ARM64 Page Size Compatibility
 
-[Microsoft's mimalloc](https://github.com/microsoft/mimalloc) provides an excellent alternative that:
-- ✅ **Works across all architectures** including ARM64 and Apple Silicon
-- ✅ **Handles different page sizes** gracefully  
-- ✅ **Provides excellent performance** comparable to or better than jemalloc
-- ✅ **Maintained by Microsoft** with active development
+Jemalloc may have compatibility issues with ARM64 systems that use different page sizes, particularly:
+- **Apple Silicon (16K pages)**: As documented in [Facebook Buck2 issue #91](https://github.com/facebook/buck2/issues/91) and [jemalloc issue #2178](https://github.com/jemalloc/jemalloc/issues/2178)
+- **Some ARM64 server systems (64K pages)**: See [Red Hat Bugzilla #1545539](https://bugzilla.redhat.com/show_bug.cgi?id=1545539)
+
+However, **Amazon Linux 2023 uses 4K page size** ([AWS documentation](https://docs.aws.amazon.com/linux/al2023/ug/ec2.html)), which is compatible with jemalloc's default configuration, ensuring reliable operation across all AWS Graviton instances.
 
 ## Build System
 
@@ -98,9 +105,10 @@ The project uses a unified GitHub Actions workflow that:
 
 ### Build Architecture
 
-1. **Binary Compilation**: Native compilation of jemalloc and mimalloc on respective architectures
-2. **Container Building**: Multi-architecture container builds using pre-compiled binaries
-3. **Automatic Publishing**: Images pushed to registry during build process
+1. **Package Installation**: Jemalloc uses Amazon Linux 2023 package manager
+2. **Binary Compilation**: Native compilation of mimalloc on respective architectures  
+3. **Container Building**: Multi-architecture container builds with optimized layers
+4. **Automatic Publishing**: Images pushed to registry during build process
 
 ### Manual Builds
 
@@ -123,7 +131,7 @@ make build
 
 # Build specific variants  
 make build-base version=25-al2023
-make build-jemalloc version=25-al2023    # AMD64 only
+make build-jemalloc version=25-al2023    # Multi-arch
 make build-mimalloc version=25-al2023    # Multi-arch
 ```
 
@@ -132,8 +140,8 @@ make build-mimalloc version=25-al2023    # Multi-arch
 ### When to Use Each Variant
 
 - **Base**: Default choice for standard applications
-- **Jemalloc**: CPU-intensive workloads on AMD64 with heavy memory allocation
-- **Mimalloc**: High-performance applications requiring ARM64 support or cross-platform consistency
+- **Jemalloc**: CPU-intensive workloads with heavy memory allocation (AMD64/ARM64)
+- **Mimalloc**: High-performance applications with varied allocation patterns
 
 ### Performance Characteristics
 
