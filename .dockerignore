@@ -2,4 +2,3 @@
 !wait-for-it.sh
 !install-jemalloc.sh
 !jemalloc-binaries/
-!mimalloc-binaries/

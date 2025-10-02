@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a multi-architecture Java JDK container project (`nf-jdk`) that builds three variants of Java containers with different memory allocators, specifically designed for backend execution in the Nextflow ecosystem.
+This is a multi-architecture Java JDK container project (`nf-jdk`) that builds two variants of Java containers with different memory allocators, specifically designed for backend execution in the Nextflow ecosystem.
 
 ## Build Architecture
 
@@ -18,26 +18,18 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
    - Amazon Linux 2023 jemalloc package with native ARM64/AMD64 support
    - Environment: `LD_PRELOAD=/usr/lib64/libjemalloc.so.2`
 
-3. **Mimalloc Container** (`Dockerfile_mimalloc`)
-   - Image: `nf-jdk:corretto-{version}-mimalloc`
-   - Pre-compiled mimalloc 2.1.7 binaries for AMD64/ARM64
-   - Environment: `LD_PRELOAD=/opt/mimalloc/lib/libmimalloc.so.2.1`
-
 ### Multi-Architecture Support
 
 - **Architectures**: linux/amd64, linux/arm64
 - **Build Method**: Docker Buildx with multi-platform support
 - **Jemalloc**: Uses AL2023 package manager (native ARM64/AMD64 support)
-- **Mimalloc**: Native compilation on respective architectures
-- **Runners**: `ubuntu-latest` (AMD64), `ubuntu-24.04-arm64` (ARM64)
 
 ## Build Targets (Makefile)
 
 - `make all`: Build and push all variants
-- `make build`: Build all variants (base + jemalloc + mimalloc)
+- `make build`: Build all variants (base + jemalloc)
 - `make build-base`: Standard Java container
 - `make build-jemalloc`: Container with jemalloc
-- `make build-mimalloc`: Container with mimalloc
 - `make push`: No-op (images pushed during build)
 
 ## Workflow Structure
@@ -50,18 +42,13 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 - **No push builds**: Removed automatic builds on code pushes
 
 **Execution Flow:**
-1. **Parallel Binary Builds** (inline jobs):
-   - `build-mimalloc-amd64`: Builds AMD64 mimalloc binaries
-   - `build-mimalloc-arm64`: Builds ARM64 mimalloc binaries
-
-2. **Parallel Container Matrix Builds**:
+1. **Parallel Container Matrix Builds**:
    - `build-base`: Matrix job (3 versions) - independent base containers
    - `build-jemalloc-container`: Matrix job (3 versions) - uses AL2023 package manager
-   - `build-mimalloc-container`: Matrix job (3 versions) - uses AMD64/ARM64 mimalloc artifacts
 
 **Matrix Strategy:**
 - **Versions**: ['17-al2023', '21-al2023', '25-al2023']
-- **Total Builds**: 9 container images per run (3 versions × 3 variants)
+- **Total Builds**: 6 container images per run (3 versions × 2 variants)
 - **Architecture Support**: All variants support multi-arch (AMD64/ARM64)
 
 ## Release Process
@@ -70,7 +57,7 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 - **Automatic**: Images are pushed during build with `--push` flag
 - **No Git tagging**: Removed tag-and-push.sh script and post-build jobs
 - **Registry**: cr.seqera.io/public
-- **Image naming**: nf-jdk:corretto-{version}[-jemalloc|-mimalloc]
+- **Image naming**: nf-jdk:corretto-{version}[-jemalloc]
 
 ### Version Management
 
@@ -86,7 +73,6 @@ make build
 
 # Build specific variant
 make build-jemalloc
-make build-mimalloc
 ```
 
 ### Manual Builds
@@ -109,7 +95,5 @@ gh run list --workflow=build.yml --limit=5
 ## Performance Optimizations
 
 1. **Package Manager Integration**: Jemalloc uses AL2023 native packages (no compilation needed)
-2. **Binary Artifact Caching**: Mimalloc binaries cached between workflows
-3. **Parallel Execution**: Independent builds run concurrently
-4. **Native Compilation**: Mimalloc compiled natively for each architecture
-5. **Docker Layer Caching**: Buildx optimization for multi-platform builds
+2. **Parallel Execution**: Independent builds run concurrently
+3. **Docker Layer Caching**: Buildx optimization for multi-platform builds
