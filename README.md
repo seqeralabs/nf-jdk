@@ -160,3 +160,4 @@ For detailed technical information, build system architecture, and development g
 - [Facebook Buck2 ARM64 Issue](https://github.com/facebook/buck2/issues/91)
 - [Amazon Corretto](https://aws.amazon.com/corretto/)
 - [Seqera](https://www.seqera.io/)
+- [X thread on mem alloca](https://x.com/arpit_bhayani/status/1975565063772905528)
