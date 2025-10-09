@@ -4,7 +4,7 @@ Multi-architecture Java JDK containers optimized with different memory allocator
 
 ## Container Variants
 
-This project builds three types of Java containers, each optimized for different use cases:
+This project builds two types of Java containers, each optimized for different use cases:
 
 ### 🏗️ Base Container
 - **Image**: `nf-jdk:corretto-{version}`
@@ -12,17 +12,11 @@ This project builds three types of Java containers, each optimized for different
 - **Memory Allocator**: System default
 - **Use Case**: Standard Java applications
 
-### ⚡ Jemalloc Container  
+### ⚡ Jemalloc Container
 - **Image**: `nf-jdk:corretto-{version}-jemalloc`
 - **Architecture**: AMD64, ARM64
 - **Memory Allocator**: [jemalloc 5.2.1](https://github.com/jemalloc/jemalloc) (Amazon Linux 2023 package)
 - **Use Case**: High-performance applications with intensive memory allocation
-
-### 🚀 Mimalloc Container
-- **Image**: `nf-jdk:corretto-{version}-mimalloc`  
-- **Architecture**: AMD64, ARM64
-- **Memory Allocator**: [mimalloc 2.1.7](https://github.com/microsoft/mimalloc)
-- **Use Case**: Cross-platform performance optimization
 
 ## Architecture Support Matrix
 
@@ -30,7 +24,6 @@ This project builds three types of Java containers, each optimized for different
 |----------|-------|-------|---------------------------------|
 | Base     | ✅     | ✅     | Standard Java runtime           |
 | Jemalloc | ✅     | ✅     | Multi-arch via AL2023 package  |
-| Mimalloc | ✅     | ✅     | Full multi-architecture support |
 
 ## Available Versions
 
@@ -57,11 +50,6 @@ docker pull cr.seqera.io/public/nf-jdk:corretto-17-al2023
 docker pull cr.seqera.io/public/nf-jdk:corretto-25-al2023-jemalloc
 docker pull cr.seqera.io/public/nf-jdk:corretto-21-al2023-jemalloc
 docker pull cr.seqera.io/public/nf-jdk:corretto-17-al2023-jemalloc
-
-# Pull mimalloc-optimized containers (multi-architecture)
-docker pull cr.seqera.io/public/nf-jdk:corretto-25-al2023-mimalloc
-docker pull cr.seqera.io/public/nf-jdk:corretto-21-al2023-mimalloc
-docker pull cr.seqera.io/public/nf-jdk:corretto-17-al2023-mimalloc
 ```
 
 ## Jemalloc Multi-Architecture Support
@@ -101,14 +89,13 @@ The project uses a unified GitHub Actions workflow that:
 - **Schedule**: Runs daily at 1:00 AM UTC
 - **Manual Trigger**: Available via `workflow_dispatch`
 - **No Push Builds**: Removed for cleaner development workflow
-- **Matrix Strategy**: Builds 9 containers per run (3 versions × 3 variants)
+- **Matrix Strategy**: Builds 6 containers per run (3 versions × 2 variants)
 
 ### Build Architecture
 
 1. **Package Installation**: Jemalloc uses Amazon Linux 2023 package manager
-2. **Binary Compilation**: Native compilation of mimalloc on respective architectures  
-3. **Container Building**: Multi-architecture container builds with optimized layers
-4. **Automatic Publishing**: Images pushed to registry during build process
+2. **Container Building**: Multi-architecture container builds with optimized layers
+3. **Automatic Publishing**: Images pushed to registry during build process
 
 ### Manual Builds
 
@@ -129,10 +116,9 @@ gh run view <run-id> --log
 # Build all variants locally
 make build
 
-# Build specific variants  
+# Build specific variants
 make build-base version=25-al2023
 make build-jemalloc version=25-al2023    # Multi-arch
-make build-mimalloc version=25-al2023    # Multi-arch
 ```
 
 ## Memory Allocator Performance
@@ -141,12 +127,10 @@ make build-mimalloc version=25-al2023    # Multi-arch
 
 - **Base**: Default choice for standard applications
 - **Jemalloc**: CPU-intensive workloads with heavy memory allocation (AMD64/ARM64)
-- **Mimalloc**: High-performance applications with varied allocation patterns
 
 ### Performance Characteristics
 
 - **Jemalloc**: Excellent for server workloads with sustained memory allocation patterns
-- **Mimalloc**: Lower memory overhead, better for applications with varied allocation patterns
 - **System Default**: Adequate for most use cases, lowest complexity
 
 ## Technical Documentation
@@ -156,7 +140,6 @@ For detailed technical information, build system architecture, and development g
 ## References
 
 - [Jemalloc Project](https://github.com/jemalloc/jemalloc)
-- [Microsoft mimalloc](https://github.com/microsoft/mimalloc)  
 - [Facebook Buck2 ARM64 Issue](https://github.com/facebook/buck2/issues/91)
 - [Amazon Corretto](https://aws.amazon.com/corretto/)
 - [Seqera](https://www.seqera.io/)
