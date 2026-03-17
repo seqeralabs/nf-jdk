@@ -1,5 +1,5 @@
 repo = cr.seqera.io/public
-version = $(shell cat VERSION)
+version ?= $(shell cat VERSION)
 image = nf-jdk:corretto-${version}
 
 all: build push
@@ -11,9 +11,8 @@ build-base:
 	 build \
 	 --no-cache \
 	 --platform linux/amd64,linux/arm64 \
-	 --build-arg VERSION=${version} \
 	 -t ${repo}/${image} \
-	 -f Dockerfile \
+	 -f Dockerfile.$(version) \
 	 --push \
 	 .
 
@@ -22,9 +21,8 @@ build-jemalloc:
 	 build \
 	 --no-cache \
 	 --platform linux/amd64,linux/arm64 \
-	 --build-arg VERSION=${version} \
 	 -t ${repo}/${image}-jemalloc \
-	 -f Dockerfile_jemalloc \
+	 -f Dockerfile_jemalloc.$(version) \
 	 --push \
 	 .
 
