@@ -1,0 +1,28 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+
+  "extends": [
+    "config:recommended"
+  ],
+
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track container image digests in Make file",
+      "fileMatch": ["^Make$", "Makefile"],
+      "matchStrings": [
+        "[A-Z_0-9-]+\\s*=\\s*(?<depName>[^\\s:]+):(?<currentValue>[^@]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ],
+
+  "packageRules": [
+    {
+      "description": "Only bump container image digests, never tags or versions",
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["digest"],
+      "enabled": true
+    }
+  ]
+}
