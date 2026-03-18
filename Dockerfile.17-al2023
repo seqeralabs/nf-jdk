@@ -1,7 +1,0 @@
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:17-al2023@sha256:db101a3d80675184276368aec62ecbb73bfff894d7b1f342484833abdd68c100
-
-ADD wait-for-it.sh /usr/local/bin/
-
-RUN yum update -y \
-    && yum install -y tar gzip procps which \
-    && yum clean all

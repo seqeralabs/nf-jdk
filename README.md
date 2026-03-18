@@ -89,13 +89,14 @@ The project uses a unified GitHub Actions workflow that:
 - **Schedule**: Runs daily at 1:00 AM UTC
 - **Manual Trigger**: Available via `workflow_dispatch`
 - **No Push Builds**: Removed for cleaner development workflow
-- **Matrix Strategy**: Builds 6 containers per run (3 versions × 2 variants)
+- **Matrix Strategy**: Version list comes from the Makefile (`make print-versions`); builds 6 containers per run (3 versions × 2 variants) with the current default versions.
 
 ### Build Architecture
 
-1. **Package Installation**: Jemalloc uses Amazon Linux 2023 package manager
-2. **Container Building**: Multi-architecture container builds with optimized layers
-3. **Automatic Publishing**: Images pushed to registry during build process
+1. **Single source of truth**: Versions and base image digests are defined in the Makefile; generic `Dockerfile` and `Dockerfile_jemalloc` use `ARG BASE_IMAGE` passed at build time.
+2. **Package Installation**: Jemalloc uses Amazon Linux 2023 package manager
+3. **Container Building**: Multi-architecture container builds with optimized layers
+4. **Automatic Publishing**: Images pushed to registry during build process
 
 ### Manual Builds
 
@@ -113,13 +114,15 @@ gh run view <run-id> --log
 ### Local Development
 
 ```bash
-# Build all variants locally
+# Build all variants locally (uses VERSION file for default version)
 make build
 
 # Build specific variants
 make build-base version=25-al2023
 make build-jemalloc version=25-al2023    # Multi-arch
 ```
+
+To add or change JDK versions, edit only the Makefile: add to `VERSIONS`, add a `CORRETTO_*` base image pin (with digest), and a `base_image_*` mapping. Renovate will propose digest updates for those pins.
 
 ## Memory Allocator Performance
 

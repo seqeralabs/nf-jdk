@@ -1,4 +1,5 @@
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:17-al2023@sha256:db101a3d80675184276368aec62ecbb73bfff894d7b1f342484833abdd68c100
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
 
 ## see https://technology.blog.gov.uk/2015/12/11/using-jemalloc-to-get-to-the-bottom-of-a-memory-leak/
 # Copy installation scripts

@@ -42,13 +42,14 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 - **No push builds**: Removed automatic builds on code pushes
 
 **Execution Flow:**
-1. **Parallel Container Matrix Builds**:
-   - `build-base`: Matrix job (3 versions) - independent base containers
-   - `build-jemalloc-container`: Matrix job (3 versions) - uses AL2023 package manager
+1. **get-versions**: Reads version list from Makefile via `make print-versions` and outputs JSON for the matrix.
+2. **Parallel Container Matrix Builds** (matrix from get-versions output):
+   - `build-base`: Matrix job - independent base containers
+   - `build-jemalloc-container`: Matrix job - uses AL2023 package manager
 
 **Matrix Strategy:**
-- **Versions**: ['17-al2023', '21-al2023', '25-al2023']
-- **Total Builds**: 6 container images per run (3 versions × 2 variants)
+- **Versions**: Defined in Makefile `VERSIONS`; workflow uses dynamic matrix from `get-versions.outputs.versions`.
+- **Total Builds**: 6 container images per run (3 versions × 2 variants) with current default versions.
 - **Architecture Support**: All variants support multi-arch (AMD64/ARM64)
 
 ## Release Process
@@ -61,8 +62,10 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 
 ### Version Management
 
-- **Unified Matrix**: ['17-al2023', '21-al2023', '25-al2023'] hardcoded in workflow
-- **No VERSION file dependency**: All versions specified directly in workflow
+- **Single source of truth**: Versions and base image digests are defined in the Makefile (`VERSIONS`, `CORRETTO_*` variables). The workflow reads the version list via `make print-versions` for the dynamic matrix.
+- **Generic Dockerfiles**: `Dockerfile` and `Dockerfile_jemalloc` use `ARG BASE_IMAGE`; the Makefile passes the pinned base image per version via `--build-arg BASE_IMAGE=...`.
+- **Renovate**: Bumps base image digests in the Makefile (custom manager matches `VAR = image:tag@sha256:digest`). Adding a new JDK version requires only Makefile edits (add to `VERSIONS`, add `CORRETTO_*` pin and `base_image_*` mapping).
+- **VERSION file**: Used as default for local `make build` when `version=` is not set.
 
 ## Development Commands
 
@@ -88,7 +91,7 @@ gh run list --workflow=build.yml --limit=5
 ## Key Dependencies
 
 - **Registry**: cr.seqera.io/public
-- **Base Image**: Amazon Corretto JDK on Amazon Linux 2023
+- **Base Image**: Amazon Corretto JDK on Amazon Linux 2023; digests pinned in Makefile (`CORRETTO_*` variables) for Renovate digest bumps.
 - **Required Secrets**: SEQERA_CR_USERNAME, SEQERA_CR_PASSWORD
 - **Build Tools**: Docker Buildx, native compilation scripts
 
