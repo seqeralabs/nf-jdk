@@ -9,6 +9,8 @@ on:
       - 'Makefile'
       - 'VERSION'
       - 'install-jemalloc.sh'
+      - 'build-jemalloc.sh'
+      - 'build-jemalloc-native.sh'
 
 permissions:
   id-token: write
@@ -66,7 +68,7 @@ jobs:
         password: ${{ secrets.SEQERA_CR_PASSWORD }}
 
     - name: Set date tag (YYYYMMDD UTC)
-      run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
+      run: echo "DATE_TAG=$(date -u +%Y%m%d%H)" >> $GITHUB_ENV
 
     - name: Build base image
       run: make build-base version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }}
@@ -104,7 +106,7 @@ jobs:
         password: ${{ secrets.SEQERA_CR_PASSWORD }}
 
     - name: Set date tag (YYYYMMDD UTC)
-      run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
+      run: echo "DATE_TAG=$(date -u +%Y%m%d%H)" >> $GITHUB_ENV
 
     - name: Build jemalloc image
       run: make build-jemalloc version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }}
