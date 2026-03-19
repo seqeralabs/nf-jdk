@@ -21,8 +21,8 @@
     {
       "description": "Only bump container image digests, never tags or versions",
       "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["digest"],
-      "enabled": true
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "enabled": false
     }
   ]
 }
