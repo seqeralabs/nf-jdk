@@ -1,6 +1,12 @@
 repo = cr.seqera.io/public
 version ?= $(shell cat VERSION)
 image = nf-jdk:corretto-${version}
+image_jemalloc = nf-jdk:corretto-${version}-jemalloc
+
+ifdef DATE_TAG
+  immutable_tag = -t ${repo}/${image}-${DATE_TAG}
+  immutable_tag_jemalloc = -t ${repo}/${image_jemalloc}-${DATE_TAG}
+endif
 
 # Versions to build (single source of truth for CI matrix)
 VERSIONS = 17-al2023 21-al2023 25-al2023
@@ -27,6 +33,7 @@ build-base:
 	 --platform linux/amd64,linux/arm64 \
 	 --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 	 -t ${repo}/${image} \
+	 $(immutable_tag) \
 	 -f Dockerfile \
 	 --push \
 	 .
@@ -38,6 +45,7 @@ build-jemalloc:
 	 --platform linux/amd64,linux/arm64 \
 	 --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 	 -t ${repo}/${image}-jemalloc \
+	 $(immutable_tag_jemalloc) \
 	 -f Dockerfile_jemalloc \
 	 --push \
 	 .

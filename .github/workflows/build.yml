@@ -1,8 +1,16 @@
 name: nf-jdk build
 on:
-  schedule:
-    - cron: "0 1 * * *"
+
   workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - 'Dockerfile*'
+      - 'Makefile'
+      - 'VERSION'
+      - 'install-jemalloc.sh'
+      - 'build-jemalloc.sh'
+      - 'build-jemalloc-native.sh'
 
 permissions:
   id-token: write
@@ -59,8 +67,11 @@ jobs:
         username: ${{ secrets.SEQERA_CR_USERNAME }}
         password: ${{ secrets.SEQERA_CR_PASSWORD }}
 
+    - name: Set date tag (YYYYMMDD UTC)
+      run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
+
     - name: Build base image
-      run: make build-base version=${{ matrix.version }}
+      run: make build-base version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }}
 
   build-jemalloc-container:
     needs: get-versions
@@ -94,5 +105,8 @@ jobs:
         username: ${{ secrets.SEQERA_CR_USERNAME }}
         password: ${{ secrets.SEQERA_CR_PASSWORD }}
 
+    - name: Set date tag (YYYYMMDD UTC)
+      run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
+
     - name: Build jemalloc image
-      run: make build-jemalloc version=${{ matrix.version }}
+      run: make build-jemalloc version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }}
