@@ -8,6 +8,10 @@ ifdef DATE_TAG
   immutable_tag_jemalloc = -t ${repo}/${image_jemalloc}-${DATE_TAG}
 endif
 
+ifdef METADATA_FILE
+  metadata_flag = --metadata-file $(METADATA_FILE)
+endif
+
 # Versions to build (single source of truth for CI matrix)
 VERSIONS = 17-al2023 21-al2023 25-al2023
 
@@ -36,6 +40,7 @@ build-base:
 	 $(immutable_tag) \
 	 -f Dockerfile \
 	 --push \
+	 $(metadata_flag) \
 	 .
 
 build-jemalloc:
@@ -48,6 +53,7 @@ build-jemalloc:
 	 $(immutable_tag_jemalloc) \
 	 -f Dockerfile_jemalloc \
 	 --push \
+	 $(metadata_flag) \
 	 .
 
 push:
