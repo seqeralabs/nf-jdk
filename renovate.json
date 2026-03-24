@@ -23,6 +23,12 @@
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["major", "minor", "patch"],
       "enabled": false
+    },
+    {
+      "description": "Group all Makefile Docker digest updates into a single PR to avoid merge conflicts",
+      "matchManagers": ["custom.regex"],
+      "matchFileNames": ["^Make$", "Makefile"],
+      "groupName": "Makefile Docker digests"
     }
   ]
 }
