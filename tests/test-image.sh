@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Smoke tests for nf-jdk container images
 set -euo pipefail
 
 IMAGE="${1:?Usage: $0 <image> [base|jemalloc]}"
