@@ -1,0 +1,85 @@
+name: nf-jdk test
+on:
+  pull_request:
+    paths:
+      - 'Dockerfile*'
+      - 'Makefile'
+      - 'VERSION'
+      - 'install-jemalloc.sh'
+      - 'wait-for-it.sh'
+      - 'tests/**'
+      - '.github/workflows/test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  get-versions:
+    name: Get versions from Makefile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout@v4.3.1
+        with:
+          fetch-depth: 1
+
+      - id: versions
+        run: |
+          echo "versions<<EOF" >> $GITHUB_OUTPUT
+          make -s print-versions >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+    outputs:
+      versions: ${{ steps.versions.outputs.versions }}
+
+  test-base:
+    needs: get-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJson(needs.get-versions.outputs.versions) }}
+
+    name: Test base (${{ matrix.version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout@v4.3.1
+      with:
+        fetch-depth: 1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # docker/setup-buildx-action@v3.12.0
+
+    - name: Build base image
+      run: make build-base-local version=${{ matrix.version }}
+
+    - name: Test base image
+      run: bash tests/test-image.sh "nf-jdk:corretto-${{ matrix.version }}" base
+
+  test-jemalloc:
+    needs: get-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJson(needs.get-versions.outputs.versions) }}
+
+    name: Test jemalloc (${{ matrix.version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout@v4.3.1
+      with:
+        fetch-depth: 1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # docker/setup-buildx-action@v3.12.0
+
+    - name: Build jemalloc image
+      run: make build-jemalloc-local version=${{ matrix.version }}
+
+    - name: Test jemalloc image
+      run: bash tests/test-image.sh "nf-jdk:corretto-${{ matrix.version }}-jemalloc" jemalloc
