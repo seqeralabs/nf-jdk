@@ -5,6 +5,10 @@
     "config:recommended"
   ],
 
+  "reviewers": ["team:security"],
+
+  "minimumReleaseAge": "5 days",
+
   "customManagers": [
     {
       "customType": "regex",
