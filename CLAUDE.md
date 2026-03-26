@@ -64,7 +64,7 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 
 - **Single source of truth**: Versions and base image digests are defined in the Makefile (`VERSIONS`, `CORRETTO_*` variables). The workflow reads the version list via `make print-versions` for the dynamic matrix.
 - **Generic Dockerfiles**: `Dockerfile` and `Dockerfile_jemalloc` use `ARG BASE_IMAGE`; the Makefile passes the pinned base image per version via `--build-arg BASE_IMAGE=...`.
-- **Renovate**: Bumps base image digests in the Makefile (custom manager matches `VAR = image:tag@sha256:digest`). Adding a new JDK version requires only Makefile edits (add to `VERSIONS`, add `CORRETTO_*` pin and `base_image_*` mapping).
+- **Renovate**: Bumps base image version tags and digests in the Makefile (custom manager matches `VAR = image:tag@sha256:digest`). Major version bumps are disabled; minor/patch versions and digest updates are automatic. Adding a new JDK version requires only Makefile edits (add to `VERSIONS`, add `CORRETTO_*` pin and `base_image_*` mapping).
 - **VERSION file**: Used as default for local `make build` when `version=` is not set.
 
 ## Development Commands

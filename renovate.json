@@ -19,9 +19,9 @@
 
   "packageRules": [
     {
-      "description": "Only bump container image digests, never tags or versions",
+      "description": "Do not bump to a new major JDK version automatically",
       "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["major", "minor", "patch"],
+      "matchUpdateTypes": ["major"],
       "enabled": false
     },
     {

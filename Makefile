@@ -1,11 +1,15 @@
 repo = cr.seqera.io/public
 version ?= $(shell cat VERSION)
 image = nf-jdk:corretto-${version}
-image_jemalloc = nf-jdk:corretto-${version}-jemalloc
+
+# Extract the specific version tag from the pinned base image
+# e.g. "public.ecr.aws/.../amazoncorretto:17.0.18-al2023@sha256:..." → "17.0.18-al2023"
+BASE_IMAGE_TAG = $(word 2,$(subst :, ,$(word 1,$(subst @, ,$(BASE_IMAGE)))))
+image_versioned = nf-jdk:corretto-$(BASE_IMAGE_TAG)
 
 ifdef DATE_TAG
-  immutable_tag = -t ${repo}/${image}-${DATE_TAG}
-  immutable_tag_jemalloc = -t ${repo}/${image_jemalloc}-${DATE_TAG}
+  immutable_tag = -t ${repo}/${image_versioned}-${DATE_TAG}
+  immutable_tag_jemalloc = -t ${repo}/${image_versioned}-jemalloc-${DATE_TAG}
 endif
 
 ifdef METADATA_FILE
@@ -16,9 +20,9 @@ endif
 VERSIONS = 17-al2023 21-al2023 25-al2023
 
 # Base image pins with digests (Renovate bumps digests here)
-CORRETTO_17_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:17-al2023@sha256:1b0f8efb6fed722997d40d8983b1b9973822e69c0dd9851c037eb43fa1e4d84e
-CORRETTO_21_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:21-al2023@sha256:32aa02d746f88a8cb58c59daf9342b82136d414f1c4507810ef5f4b5e2b48251
-CORRETTO_25_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:25-al2023@sha256:c2dd10d90f7dac05104f450b49443b3b7096d9e305dfff70266a897b725f642f
+CORRETTO_17_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:17.0.18-al2023@sha256:1b0f8efb6fed722997d40d8983b1b9973822e69c0dd9851c037eb43fa1e4d84e
+CORRETTO_21_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:21.0.9-al2023@sha256:152103ba39f5d5ba7c39e8c10d9dab55b3a1383bff3ea16bec95821de354bbb8
+CORRETTO_25_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:25.0.2-al2023@sha256:c2dd10d90f7dac05104f450b49443b3b7096d9e305dfff70266a897b725f642f
 
 # Map version to base image (used when version= is set)
 base_image_17-al2023 = $(CORRETTO_17_AL2023)
@@ -37,6 +41,7 @@ build-base:
 	 --platform linux/amd64,linux/arm64 \
 	 --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 	 -t ${repo}/${image} \
+	 -t ${repo}/${image_versioned} \
 	 $(immutable_tag) \
 	 -f Dockerfile \
 	 --push \
@@ -50,6 +55,7 @@ build-jemalloc:
 	 --platform linux/amd64,linux/arm64 \
 	 --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 	 -t ${repo}/${image}-jemalloc \
+	 -t ${repo}/${image_versioned}-jemalloc \
 	 $(immutable_tag_jemalloc) \
 	 -f Dockerfile_jemalloc \
 	 --push \
