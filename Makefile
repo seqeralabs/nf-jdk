@@ -56,6 +56,32 @@ build-jemalloc:
 	 $(metadata_flag) \
 	 .
 
+build-base-local:
+	docker buildx \
+	 build \
+	 --no-cache \
+	 --platform linux/amd64 \
+	 --build-arg BASE_IMAGE=$(BASE_IMAGE) \
+	 -t ${image} \
+	 -f Dockerfile \
+	 --load \
+	 .
+
+build-jemalloc-local:
+	docker buildx \
+	 build \
+	 --no-cache \
+	 --platform linux/amd64 \
+	 --build-arg BASE_IMAGE=$(BASE_IMAGE) \
+	 -t ${image}-jemalloc \
+	 -f Dockerfile_jemalloc \
+	 --load \
+	 .
+
+test: build-base-local build-jemalloc-local
+	bash tests/test-image.sh $(image) base
+	bash tests/test-image.sh $(image)-jemalloc jemalloc
+
 push:
 	echo "++ Multi-arch images already pushed during build"
 
