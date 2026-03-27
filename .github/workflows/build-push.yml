@@ -1,0 +1,180 @@
+name: nf-jdk build
+on:
+
+  workflow_dispatch:
+
+  push:
+    branches: [main, master]
+    paths:
+      - 'Dockerfile*'
+      - 'Makefile'
+      - 'VERSION'
+      - 'install-jemalloc.sh'
+      - 'build-jemalloc.sh'
+      - 'build-jemalloc-native.sh'
+
+permissions:
+  id-token: write
+  contents: write
+  attestations: write
+  packages: write
+
+env:
+    AWS_REGION: eu-west-2
+    REPO_NAME: nf-jdk
+    REPO_PATH: /private/nf-jdk
+
+jobs:
+  get-versions:
+    name: Get versions from Makefile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout@v4.3.1
+        with:
+          fetch-depth: 1
+
+      - id: versions
+        run: |
+          echo "versions<<EOF" >> $GITHUB_OUTPUT
+          make -s print-versions >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+    outputs:
+      versions: ${{ steps.versions.outputs.versions }}
+
+  build-base:
+    needs: get-versions
+    strategy:
+      matrix:
+        version: ${{ fromJson(needs.get-versions.outputs.versions) }}
+
+    name: Build base container
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout@v4.3.1
+      with:
+        fetch-depth: 1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # docker/setup-buildx-action@v3.12.0
+    
+    - name: Set AWS credentials
+      uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # ratchet:aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: arn:aws:iam::232933512461:role/${{ env.REPO_NAME }}-ecr-pusher
+        role-session-name: GitHubActions-${{ github.run_id }}
+        
+    - name: Login to ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@63b72603819790d372a54de608355b740024495d # aws-actions/amazon-ecr-login@v2
+
+    - name: Set date tag (YYYYMMDD UTC)
+      run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
+
+    - name: Build base image
+      run: make build-base version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }} METADATA_FILE=/tmp/build-metadata.json
+
+    - name: Extract image digest
+      id: digest
+      run: |
+        DIGEST=$(jq -r '.["containerimage.digest"]' /tmp/build-metadata.json)
+        echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # anchore/sbom-action@v0.24.0
+      with:
+        image: ${{steps.login-ecr.outputs.registry}}${{env.REPO_PATH}}:corretto-${{ matrix.version }}@${{ steps.digest.outputs.digest }}
+        artifact-name: sbom-base-${{ matrix.version }}.spdx.json
+        output-file: /tmp/sbom-base.spdx.json
+
+    - name: Attest build provenance
+      uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # actions/attest-build-provenance@v2.4.0
+      with:
+        subject-name: ${{steps.login-ecr.outputs.registry}}${{env.REPO_PATH}}
+        subject-digest: ${{ steps.digest.outputs.digest }}
+        push-to-registry: true
+
+    - name: Attest SBOM
+      uses: actions/attest-sbom@bd218ad0dbcb3e146bd073d1d9c6d78e08aa8a0b # actions/attest-sbom@v2.4.0
+      with:
+        subject-name: ${{steps.login-ecr.outputs.registry}}${{env.REPO_PATH}}
+        subject-digest: ${{ steps.digest.outputs.digest }}
+        sbom-path: /tmp/sbom-base.spdx.json
+        push-to-registry: true
+
+  build-jemalloc-container:
+    needs: get-versions
+    strategy:
+      matrix:
+        version: ${{ fromJson(needs.get-versions.outputs.versions) }}
+
+    name: Build jemalloc container
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout@v4.3.1
+      with:
+        fetch-depth: 1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # docker/setup-buildx-action@v3.12.0
+
+    - name: Set AWS credentials
+      uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # ratchet:aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: arn:aws:iam::232933512461:role/${{ env.REPO_NAME }}-ecr-pusher
+        role-session-name: GitHubActions-${{ github.run_id }}
+        
+    - name: Login to ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@63b72603819790d372a54de608355b740024495d # aws-actions/amazon-ecr-login@v2
+
+    - name: Set date tag (YYYYMMDD UTC)
+      run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
+
+    - name: Build jemalloc image
+      run: make build-jemalloc version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }} METADATA_FILE=/tmp/build-metadata.json
+
+    - name: Extract image digest
+      id: digest
+      run: |
+        DIGEST=$(jq -r '.["containerimage.digest"]' /tmp/build-metadata.json)
+        echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # anchore/sbom-action@v0.24.0
+      with:
+        image: ${{steps.login-ecr.outputs.registry}}${{env.REPO_PATH}}:corretto-${{ matrix.version }}-jemalloc@${{ steps.digest.outputs.digest }}
+        artifact-name: sbom-jemalloc-${{ matrix.version }}.spdx.json
+        output-file: /tmp/sbom-jemalloc.spdx.json
+
+    - name: Attest build provenance
+      uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # actions/attest-build-provenance@v2.4.0
+      with:
+        subject-name: ${{ steps.login-ecr.outputs.registry }}${{env.REPO_PATH}}
+        subject-digest: ${{ steps.digest.outputs.digest }}
+        push-to-registry: true
+
+    - name: Attest SBOM
+      uses: actions/attest-sbom@bd218ad0dbcb3e146bd073d1d9c6d78e08aa8a0b # actions/attest-sbom@v2.4.0
+      with:
+        subject-name: ${{ steps.login-ecr.outputs.registry }}${{ env.REPO_PATH }}
+        subject-digest: ${{ steps.digest.outputs.digest }}
+        sbom-path: /tmp/sbom-jemalloc.spdx.json
+        push-to-registry: true
+
+        
