@@ -1,4 +1,4 @@
-name: nf-jdk build
+name: nf-jdk build and push to AWS ECR
 on:
 
   workflow_dispatch:
