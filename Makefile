@@ -20,9 +20,9 @@ endif
 VERSIONS = 17-al2023 21-al2023 25-al2023
 
 # Base image pins with digests (Renovate bumps digests here)
-CORRETTO_17_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:17.0.20-al2023@sha256:90617ef1a52a0b0db24613311b69cc75b4e71dcb7349ea1f67651220ba90091b
-CORRETTO_21_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:21.0.12-al2023@sha256:0b111c34421d8c66522ea069cc28b84c5c84dcc68256c8b8340c34c102287ef9
-CORRETTO_25_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:25.0.4-al2023@sha256:36b4504131010595e2a4dd9f033e472c9544f4a6367bd17e37bdd3e99d93998e
+CORRETTO_17_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:17.0.20-al2023@sha256:adfdfd88818ad58c8f94347cdb7ff4c924a3ed820d2920cb7bf93d6c7ab95c61
+CORRETTO_21_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:21.0.12-al2023@sha256:d756b1a46fedb99d4bce08e469d5e136970e2d4df06be2c472632f8f11e3aebb
+CORRETTO_25_AL2023 = public.ecr.aws/amazoncorretto/amazoncorretto:25.0.4-al2023@sha256:35c19ad37f795a0063b13efa3446d7a4302dbdc2318f7a8b04342ccbe52c6488
 
 # Map version to base image (used when version= is set)
 base_image_17-al2023 = $(CORRETTO_17_AL2023)
