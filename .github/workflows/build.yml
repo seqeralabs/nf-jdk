@@ -62,9 +62,9 @@ jobs:
     - name: Docker Login
       uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # docker/login-action@v3.7.0
       with:
-        registry: "cr.seqera.io"
-        username: ${{ secrets.SEQERA_CR_USERNAME }}
-        password: ${{ secrets.SEQERA_CR_PASSWORD }}
+        registry: "public.cr.seqera.io"
+        username: "nf-jdk-ci-admin"
+        password: ${{ secrets.SEQERA_PUBLIC_CR_PASSWORD }}
 
     - name: Set date tag (YYYYMMDD UTC)
       run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
@@ -81,21 +81,21 @@ jobs:
     - name: Generate SBOM
       uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # anchore/sbom-action@v0.24.0
       with:
-        image: cr.seqera.io/public/nf-jdk:corretto-${{ matrix.version }}@${{ steps.digest.outputs.digest }}
+        image: public.cr.seqera.io/nf-jdk:corretto-${{ matrix.version }}@${{ steps.digest.outputs.digest }}
         artifact-name: sbom-base-${{ matrix.version }}.spdx.json
         output-file: /tmp/sbom-base.spdx.json
 
     - name: Attest build provenance
       uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # actions/attest-build-provenance@v2.4.0
       with:
-        subject-name: cr.seqera.io/public/nf-jdk
+        subject-name: public.cr.seqera.io/nf-jdk
         subject-digest: ${{ steps.digest.outputs.digest }}
         push-to-registry: true
 
     - name: Attest SBOM
       uses: actions/attest-sbom@bd218ad0dbcb3e146bd073d1d9c6d78e08aa8a0b # actions/attest-sbom@v2.4.0
       with:
-        subject-name: cr.seqera.io/public/nf-jdk
+        subject-name: public.cr.seqera.io/nf-jdk
         subject-digest: ${{ steps.digest.outputs.digest }}
         sbom-path: /tmp/sbom-base.spdx.json
         push-to-registry: true
@@ -125,9 +125,9 @@ jobs:
     - name: Docker Login
       uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # docker/login-action@v3.7.0
       with:
-        registry: "cr.seqera.io"
-        username: ${{ secrets.SEQERA_CR_USERNAME }}
-        password: ${{ secrets.SEQERA_CR_PASSWORD }}
+        registry: "public.cr.seqera.io"
+        username: "nf-jdk-ci-admin"
+        password: ${{ secrets.SEQERA_PUBLIC_CR_PASSWORD }}
 
     - name: Set date tag (YYYYMMDD UTC)
       run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
@@ -144,21 +144,21 @@ jobs:
     - name: Generate SBOM
       uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # anchore/sbom-action@v0.24.0
       with:
-        image: cr.seqera.io/public/nf-jdk:corretto-${{ matrix.version }}-jemalloc@${{ steps.digest.outputs.digest }}
+        image: public.cr.seqera.io/nf-jdk:corretto-${{ matrix.version }}-jemalloc@${{ steps.digest.outputs.digest }}
         artifact-name: sbom-jemalloc-${{ matrix.version }}.spdx.json
         output-file: /tmp/sbom-jemalloc.spdx.json
 
     - name: Attest build provenance
       uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # actions/attest-build-provenance@v2.4.0
       with:
-        subject-name: cr.seqera.io/public/nf-jdk
+        subject-name: public.cr.seqera.io/nf-jdk
         subject-digest: ${{ steps.digest.outputs.digest }}
         push-to-registry: true
 
     - name: Attest SBOM
       uses: actions/attest-sbom@bd218ad0dbcb3e146bd073d1d9c6d78e08aa8a0b # actions/attest-sbom@v2.4.0
       with:
-        subject-name: cr.seqera.io/public/nf-jdk
+        subject-name: public.cr.seqera.io/nf-jdk
         subject-digest: ${{ steps.digest.outputs.digest }}
         sbom-path: /tmp/sbom-jemalloc.spdx.json
         push-to-registry: true

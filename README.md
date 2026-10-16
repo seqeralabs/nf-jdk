@@ -35,21 +35,21 @@ All container variants are built for multiple Java versions:
 ## Registry
 
 Images are published to Seqera Labs' container registry:
-- **Registry**: `cr.seqera.io/public`
+- **Registry**: `public.cr.seqera.io`
 - **Repository**: `nf-jdk`
 
 ## Usage Examples
 
 ```bash
 # Pull base containers
-docker pull cr.seqera.io/public/nf-jdk:corretto-25-al2023
-docker pull cr.seqera.io/public/nf-jdk:corretto-21-al2023
-docker pull cr.seqera.io/public/nf-jdk:corretto-17-al2023
+docker pull public.cr.seqera.io/nf-jdk:corretto-25-al2023
+docker pull public.cr.seqera.io/nf-jdk:corretto-21-al2023
+docker pull public.cr.seqera.io/nf-jdk:corretto-17-al2023
 
 # Pull jemalloc-optimized containers (multi-architecture)
-docker pull cr.seqera.io/public/nf-jdk:corretto-25-al2023-jemalloc
-docker pull cr.seqera.io/public/nf-jdk:corretto-21-al2023-jemalloc
-docker pull cr.seqera.io/public/nf-jdk:corretto-17-al2023-jemalloc
+docker pull public.cr.seqera.io/nf-jdk:corretto-25-al2023-jemalloc
+docker pull public.cr.seqera.io/nf-jdk:corretto-21-al2023-jemalloc
+docker pull public.cr.seqera.io/nf-jdk:corretto-17-al2023-jemalloc
 ```
 
 ## Jemalloc Multi-Architecture Support

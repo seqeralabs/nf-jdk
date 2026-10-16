@@ -1,4 +1,4 @@
-repo = cr.seqera.io/public
+repo = public.cr.seqera.io
 version ?= $(shell cat VERSION)
 image = nf-jdk:corretto-${version}
 
