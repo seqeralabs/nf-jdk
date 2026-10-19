@@ -57,7 +57,7 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 ### Container Image Publishing
 - **Automatic**: Images are pushed during build with `--push` flag
 - **No Git tagging**: Removed tag-and-push.sh script and post-build jobs
-- **Registry**: cr.seqera.io/public
+- **Registry**: public.cr.seqera.io
 - **Image naming**: nf-jdk:corretto-{version}[-jemalloc]
 
 ### Version Management
@@ -90,9 +90,9 @@ gh run list --workflow=build.yml --limit=5
 
 ## Key Dependencies
 
-- **Registry**: cr.seqera.io/public
+- **Registry**: public.cr.seqera.io
 - **Base Image**: Amazon Corretto JDK on Amazon Linux 2023; digests pinned in Makefile (`CORRETTO_*` variables) for Renovate digest bumps.
-- **Required Secrets**: SEQERA_CR_USERNAME, SEQERA_CR_PASSWORD
+- **Required Secrets**: SEQERA_PUBLIC_CR_PASSWORD
 - **Build Tools**: Docker Buildx, native compilation scripts
 
 ## Performance Optimizations
