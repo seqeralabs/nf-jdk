@@ -102,6 +102,35 @@ echo ""
 echo "--- Scripts ---"
 run_test "wait-for-it.sh executable" test -x /usr/local/bin/wait-for-it.sh
 
+echo ""
+echo "--- Blocked Certificates (CVE-2026-91403) ---"
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+run_test_mounted() {
+    local description="$1"
+    shift
+    printf "  %-50s " "$description"
+    if output=$(docker run --rm -v "$ROOT_DIR:/nf-jdk:ro" "$IMAGE" "$@" 2>&1); then
+        echo "PASS"
+        PASSED=$((PASSED + 1))
+    else
+        echo "FAIL"
+        echo "    Command: docker run --rm -v $ROOT_DIR:/nf-jdk:ro $IMAGE $*"
+        echo "    Output: $output"
+        FAILED=$((FAILED + 1))
+    fi
+}
+
+run_test_mounted \
+    "All vendored fingerprints installed" \
+    bash -c 'test -z "$(grep -vxFf "$JAVA_HOME/lib/security/blocked.certs" /nf-jdk/blocked.certs)"'
+
+run_test_mounted \
+    "eMudhra intermediate CA rejected" \
+    java /nf-jdk/tests/CheckBlockedCert.java \
+        /nf-jdk/tests/em-dv-tls-ca-g3b.pem \
+        /nf-jdk/tests/aaa-certificate-services.pem
+
 if [ "$VARIANT" = "jemalloc" ]; then
     echo ""
     echo "--- Jemalloc ---"

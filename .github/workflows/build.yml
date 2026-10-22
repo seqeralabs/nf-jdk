@@ -9,6 +9,8 @@ on:
       - 'Makefile'
       - 'VERSION'
       - 'install-jemalloc.sh'
+      - 'install-blocked-certs.sh'
+      - 'blocked.certs'
       - 'build-jemalloc.sh'
       - 'build-jemalloc-native.sh'
 

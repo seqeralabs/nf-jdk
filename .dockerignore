@@ -1,4 +1,6 @@
 *
 !wait-for-it.sh
 !install-jemalloc.sh
+!install-blocked-certs.sh
+!blocked.certs
 !jemalloc-binaries/

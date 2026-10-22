@@ -12,6 +12,7 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
    - Image: `nf-jdk:corretto-{version}`
    - Standard JDK with basic utilities (tar, gzip, procps, which)
    - Includes `wait-for-it.sh` script
+   - Merges the vendored `blocked.certs` into the JDK's blocked certificate list
 
 2. **Jemalloc Container** (`Dockerfile_jemalloc`)
    - Image: `nf-jdk:corretto-{version}-jemalloc`
@@ -87,6 +88,11 @@ gh workflow run build.yml
 # Check workflow status
 gh run list --workflow=build.yml --limit=5
 ```
+
+### Blocked Certificates
+
+- `blocked.certs` is generated from OpenJDK's `blocked.certs.pem` (see README) and merged into the JDK's own list by `install-blocked-certs.sh` in both Dockerfiles (CVE-2026-91403).
+- `tests/test-image.sh` checks every vendored fingerprint is installed and that `tests/CheckBlockedCert.java` rejects a compromised eMudhra intermediate chained to an explicit AAA Certificate Services anchor.
 
 ## Key Dependencies
 
