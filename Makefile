@@ -94,3 +94,7 @@ push:
 # Output JSON array of versions for CI dynamic matrix (e.g. ["17-al2023","21-al2023","25-al2023"])
 print-versions:
 	@printf '["%s"]\n' "$$(echo $(VERSIONS) | sed 's/ /","/g')"
+
+# Output the pinned base image for the given version (e.g. make -s print-base-image version=21-al2023)
+print-base-image:
+	@echo $(BASE_IMAGE)
