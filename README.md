@@ -129,6 +129,20 @@ Base images are pulled through the Seqera central ECR pull-through cache of `pub
 
 To add or change JDK versions, edit only the Makefile: add to `VERSIONS`, add a `CORRETTO_*` base image pin (with digest, as `$(ECR_MIRROR)/<image>:<tag>@sha256:...`), and a `base_image_*` mapping. Renovate looks those pins up on `public.ecr.aws` and proposes digest updates.
 
+## Blocked Certificates
+
+Both variants merge `blocked.certs` into the JDK's `$JAVA_HOME/lib/security/blocked.certs` (via `install-blocked-certs.sh`), so the JVM distrusts every certificate OpenJDK has blocked upstream even before Corretto ships the fix. The merge keeps any entry a newer Corretto release adds on its own.
+
+The file is generated with OpenJDK's `BlockedCertsConverter` from `src/java.base/share/data/blockedcertsconverter/blocked.certs.pem` at [openjdk/jdk@22bc7357ce](https://github.com/openjdk/jdk/commit/22bc7357ce) (CVE-2026-91403, compromised eMudhra intermediate CAs). To regenerate:
+
+```bash
+X="--add-exports java.base/sun.security.util=ALL-UNNAMED --add-exports java.base/sun.security.x509=ALL-UNNAMED"
+javac $X -d out BlockedCertsConverter.java
+java $X -cp out build.tools.blockedcertsconverter.BlockedCertsConverter < blocked.certs.pem > blocked.certs
+```
+
+Once every Corretto version in `VERSIONS` ships a `blocked.certs` that contains all these entries, the vendored file and install step can be removed.
+
 ## Memory Allocator Performance
 
 ### When to Use Each Variant
