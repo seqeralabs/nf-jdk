@@ -65,7 +65,8 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 
 - **Single source of truth**: Versions and base image digests are defined in the Makefile (`VERSIONS`, `CORRETTO_*` variables). The workflow reads the version list via `make print-versions` for the dynamic matrix.
 - **Generic Dockerfiles**: `Dockerfile` and `Dockerfile_jemalloc` use `ARG BASE_IMAGE`; the Makefile passes the pinned base image per version via `--build-arg BASE_IMAGE=...`.
-- **Renovate**: Bumps base image version tags and digests in the Makefile (custom manager matches `VAR = image:tag@sha256:digest`). Major version bumps are disabled; minor/patch versions and digest updates are automatic. Adding a new JDK version requires only Makefile edits (add to `VERSIONS`, add `CORRETTO_*` pin and `base_image_*` mapping).
+- **Base image registry**: `CORRETTO_*` pins use `$(ECR_MIRROR)/...`, the central ECR pull-through cache of `public.ecr.aws` (`232933512461.dkr.ecr.eu-west-2.amazonaws.com/thirdparty/ecr-public`). CI logs in via the `gha-thirdparty-puller` OIDC role; fork PRs and local builds without AWS access set `ECR_MIRROR=public.ecr.aws`.
+- **Renovate**: Bumps base image version tags and digests in the Makefile (custom manager matches `VAR = $(ECR_MIRROR)/image:tag@sha256:digest` and looks the image up on `public.ecr.aws`). Major version bumps are disabled; minor/patch versions and digest updates are automatic. Adding a new JDK version requires only Makefile edits (add to `VERSIONS`, add `CORRETTO_*` pin and `base_image_*` mapping).
 - **VERSION file**: Used as default for local `make build` when `version=` is not set.
 
 ## Development Commands
@@ -97,7 +98,7 @@ gh run list --workflow=build.yml --limit=5
 ## Key Dependencies
 
 - **Registry**: public.cr.seqera.io
-- **Base Image**: Amazon Corretto JDK on Amazon Linux 2023; digests pinned in Makefile (`CORRETTO_*` variables) for Renovate digest bumps.
+- **Base Image**: Amazon Corretto JDK on Amazon Linux 2023, pulled through the central ECR pull-through cache; digests pinned in Makefile (`CORRETTO_*` variables) for Renovate digest bumps.
 - **Required Secrets**: SEQERA_PUBLIC_CR_PASSWORD
 - **Build Tools**: Docker Buildx, native compilation scripts
 

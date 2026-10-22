@@ -12,11 +12,12 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Track container image digests in Make file",
+      "description": "Track container image digests in Make file. Images are pulled through the ECR cache ($(ECR_MIRROR)), which Renovate cannot query, so look them up on public.ecr.aws",
       "fileMatch": ["^Make$", "Makefile"],
       "matchStrings": [
-        "[A-Z_0-9-]+\\s*=\\s*(?<depName>[^\\s:]+):(?<currentValue>[^@]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+        "[A-Z_0-9-]+\\s*=\\s*\\$\\(ECR_MIRROR\\)/(?<depName>[^\\s:]+):(?<currentValue>[^@]+)@(?<currentDigest>sha256:[a-f0-9]+)"
       ],
+      "depNameTemplate": "public.ecr.aws/{{{depName}}}",
       "datasourceTemplate": "docker"
     }
   ],

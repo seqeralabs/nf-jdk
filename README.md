@@ -120,9 +120,14 @@ make build
 # Build specific variants
 make build-base version=25-al2023
 make build-jemalloc version=25-al2023    # Multi-arch
+
+# Without access to the Seqera ECR pull-through cache, pull base images from public.ecr.aws
+make build-base-local version=25-al2023 ECR_MIRROR=public.ecr.aws
 ```
 
-To add or change JDK versions, edit only the Makefile: add to `VERSIONS`, add a `CORRETTO_*` base image pin (with digest), and a `base_image_*` mapping. Renovate will propose digest updates for those pins.
+Base images are pulled through the Seqera central ECR pull-through cache of `public.ecr.aws` (`ECR_MIRROR` in the Makefile), which avoids `public.ecr.aws` anonymous rate limits in CI. CI logs in with the `gha-thirdparty-puller` OIDC role; fork PRs fall back to `public.ecr.aws`.
+
+To add or change JDK versions, edit only the Makefile: add to `VERSIONS`, add a `CORRETTO_*` base image pin (with digest, as `$(ECR_MIRROR)/<image>:<tag>@sha256:...`), and a `base_image_*` mapping. Renovate looks those pins up on `public.ecr.aws` and proposes digest updates.
 
 ## Blocked Certificates
 
