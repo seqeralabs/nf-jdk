@@ -1,15 +1,14 @@
 #!/bin/bash
 # Temporary mitigation for CVE-2026-113470 (eMudhra intermediate CA key compromise).
-# Distrusts the roots that chain to the compromised intermediates, matching what
-# Mozilla NSS 3.131.1 and Debian ca-certificates did. Java's cacerts is generated
-# from the system trust store, so update-ca-trust covers it too.
-# Remove this script once Amazon Linux ships a ca-certificates update that drops these roots.
+# Distrusts the root that the compromised TLS intermediates chain to, matching
+# Debian ca-certificates 20250419+deb13u1. Java's cacerts is generated from the
+# system trust store, so update-ca-trust covers it too.
+# Remove this script once Amazon Linux ships a ca-certificates update that drops this root.
 set -e
 
 BLOCKLIST_DIR=/etc/pki/ca-trust/source/blocklist
 ROOTS=(
     "emSign ECC Root CA - G3"
-    "Comodo AAA Services root"
 )
 
 for label in "${ROOTS[@]}"; do

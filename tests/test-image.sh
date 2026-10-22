@@ -105,10 +105,6 @@ run_test_bash \
     '! trust list --filter=ca-anchors | grep -qF "label: emSign ECC Root CA - G3"'
 
 run_test_bash \
-    "Comodo AAA Services root not trusted" \
-    '! trust list --filter=ca-anchors | grep -qF "label: Comodo AAA Services root"'
-
-run_test_bash \
     "emSign ECC Root CA - G3 not in Java cacerts" \
     '! keytool -list -cacerts -storepass changeit | grep -q emsigneccrootca-g3'
 
