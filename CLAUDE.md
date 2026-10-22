@@ -59,6 +59,8 @@ This is a multi-architecture Java JDK container project (`nf-jdk`) that builds t
 - **Automatic**: Images are pushed during build with `--push` flag
 - **No Git tagging**: Removed tag-and-push.sh script and post-build jobs
 - **Registry**: public.cr.seqera.io
+- **Repository**: `seqeralabs/nf-jdk` (Makefile `repo`)
+- **Deprecated mirror**: `public.cr.seqera.io/nf-jdk` (Makefile `legacy_repo`) gets the same tags in the same buildx push; SBOM/provenance attestations are pushed to both
 - **Image naming**: nf-jdk:corretto-{version}[-jemalloc]
 
 ### Version Management
