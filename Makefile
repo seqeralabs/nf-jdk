@@ -1,4 +1,6 @@
-repo = public.cr.seqera.io
+repo = public.cr.seqera.io/seqeralabs
+# DEPRECATED: legacy root repository, still pushed as a mirror for backward compatibility
+legacy_repo = public.cr.seqera.io
 version ?= $(shell cat VERSION)
 image = nf-jdk:corretto-${version}
 
@@ -8,8 +10,8 @@ BASE_IMAGE_TAG = $(word 2,$(subst :, ,$(word 1,$(subst @, ,$(BASE_IMAGE)))))
 image_versioned = nf-jdk:corretto-$(BASE_IMAGE_TAG)
 
 ifdef DATE_TAG
-  immutable_tag = -t ${repo}/${image_versioned}-${DATE_TAG}
-  immutable_tag_jemalloc = -t ${repo}/${image_versioned}-jemalloc-${DATE_TAG}
+  immutable_tag = -t ${repo}/${image_versioned}-${DATE_TAG} -t ${legacy_repo}/${image_versioned}-${DATE_TAG}
+  immutable_tag_jemalloc = -t ${repo}/${image_versioned}-jemalloc-${DATE_TAG} -t ${legacy_repo}/${image_versioned}-jemalloc-${DATE_TAG}
 endif
 
 ifdef METADATA_FILE
@@ -42,6 +44,8 @@ build-base:
 	 --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 	 -t ${repo}/${image} \
 	 -t ${repo}/${image_versioned} \
+	 -t ${legacy_repo}/${image} \
+	 -t ${legacy_repo}/${image_versioned} \
 	 $(immutable_tag) \
 	 -f Dockerfile \
 	 --push \
@@ -56,6 +60,8 @@ build-jemalloc:
 	 --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 	 -t ${repo}/${image}-jemalloc \
 	 -t ${repo}/${image_versioned}-jemalloc \
+	 -t ${legacy_repo}/${image}-jemalloc \
+	 -t ${legacy_repo}/${image_versioned}-jemalloc \
 	 $(immutable_tag_jemalloc) \
 	 -f Dockerfile_jemalloc \
 	 --push \
