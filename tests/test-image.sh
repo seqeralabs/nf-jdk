@@ -99,6 +99,20 @@ run_test_bash "ps present" "ps --version 2>&1; exit 0"
 run_test "which present" which java
 
 echo ""
+echo "--- CA Trust (CVE-2026-113470) ---"
+run_test_bash \
+    "emSign ECC Root CA - G3 not trusted" \
+    '! trust list --filter=ca-anchors | grep -qF "label: emSign ECC Root CA - G3"'
+
+run_test_bash \
+    "Comodo AAA Services root not trusted" \
+    '! trust list --filter=ca-anchors | grep -qF "label: Comodo AAA Services root"'
+
+run_test_bash \
+    "emSign ECC Root CA - G3 not in Java cacerts" \
+    '! keytool -list -cacerts -storepass changeit | grep -q emsigneccrootca-g3'
+
+echo ""
 echo "--- Scripts ---"
 run_test "wait-for-it.sh executable" test -x /usr/local/bin/wait-for-it.sh
 
