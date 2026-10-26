@@ -122,10 +122,6 @@ run_test_mounted() {
 }
 
 run_test_mounted \
-    "All vendored fingerprints installed" \
-    bash -c 'test -z "$(grep -vxFf "$JAVA_HOME/lib/security/blocked.certs" /nf-jdk/blocked.certs)"'
-
-run_test_mounted \
     "eMudhra intermediate CA rejected" \
     java /nf-jdk/tests/CheckBlockedCert.java \
         /nf-jdk/tests/em-dv-tls-ca-g3b.pem \

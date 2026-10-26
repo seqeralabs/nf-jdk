@@ -135,17 +135,7 @@ To add or change JDK versions, edit only the Makefile: add to `VERSIONS`, add a 
 
 ## Blocked Certificates
 
-Both variants merge `blocked.certs` into the JDK's `$JAVA_HOME/lib/security/blocked.certs` (via `install-blocked-certs.sh`), so the JVM distrusts every certificate OpenJDK has blocked upstream even before Corretto ships the fix. The merge keeps any entry a newer Corretto release adds on its own.
-
-The file is generated with OpenJDK's `BlockedCertsConverter` from `src/java.base/share/data/blockedcertsconverter/blocked.certs.pem` at [openjdk/jdk@22bc7357ce](https://github.com/openjdk/jdk/commit/22bc7357ce) (CVE-2026-91403, compromised eMudhra intermediate CAs). To regenerate:
-
-```bash
-X="--add-exports java.base/sun.security.util=ALL-UNNAMED --add-exports java.base/sun.security.x509=ALL-UNNAMED"
-javac $X -d out BlockedCertsConverter.java
-java $X -cp out build.tools.blockedcertsconverter.BlockedCertsConverter < blocked.certs.pem > blocked.certs
-```
-
-Once every Corretto version in `VERSIONS` ships a `blocked.certs` that contains all these entries, the vendored file and install step can be removed.
+The images rely on the `blocked.certs` shipped by Corretto. The image tests check that the JVM rejects a compromised eMudhra intermediate CA (CVE-2026-91403, blocked upstream in [openjdk/jdk@22bc7357ce](https://github.com/openjdk/jdk/commit/22bc7357ce) and shipped in Corretto 17.0.21, 21.0.13 and 25.0.5), so a base image without that fix fails CI.
 
 ## Memory Allocator Performance
 

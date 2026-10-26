@@ -6,8 +6,6 @@ on:
       - 'Makefile'
       - 'VERSION'
       - 'install-jemalloc.sh'
-      - 'install-blocked-certs.sh'
-      - 'blocked.certs'
       - 'wait-for-it.sh'
       - 'tests/**'
       - '.github/workflows/test.yml'
