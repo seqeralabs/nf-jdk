@@ -45,7 +45,7 @@ jobs:
 
     name: Build base container
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
 
     env:
       GITHUB_TOKEN: ${{ github.token }}
@@ -81,7 +81,14 @@ jobs:
       run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
 
     - name: Build base image
-      run: make build-base version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }} METADATA_FILE=/tmp/build-metadata.json
+      # retry: public.cr.seqera.io pushes intermittently fail with "blob upload unknown"
+      run: |
+        for attempt in 1 2 3; do
+          make build-base version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }} METADATA_FILE=/tmp/build-metadata.json && exit 0
+          echo "::warning::build-base attempt $attempt failed"
+          sleep 30
+        done
+        exit 1
 
     - name: Extract image digest
       id: digest
@@ -134,7 +141,7 @@ jobs:
 
     name: Build jemalloc container
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
 
     env:
       GITHUB_TOKEN: ${{ github.token }}
@@ -170,7 +177,14 @@ jobs:
       run: echo "DATE_TAG=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
 
     - name: Build jemalloc image
-      run: make build-jemalloc version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }} METADATA_FILE=/tmp/build-metadata.json
+      # retry: public.cr.seqera.io pushes intermittently fail with "blob upload unknown"
+      run: |
+        for attempt in 1 2 3; do
+          make build-jemalloc version=${{ matrix.version }} DATE_TAG=${{ env.DATE_TAG }} METADATA_FILE=/tmp/build-metadata.json && exit 0
+          echo "::warning::build-jemalloc attempt $attempt failed"
+          sleep 30
+        done
+        exit 1
 
     - name: Extract image digest
       id: digest
