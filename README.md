@@ -133,10 +133,6 @@ Base images are pulled through the Seqera central ECR pull-through cache of `pub
 
 To add or change JDK versions, edit only the Makefile: add to `VERSIONS`, add a `CORRETTO_*` base image pin (with digest, as `$(ECR_MIRROR)/<image>:<tag>@sha256:...`), and a `base_image_*` mapping. Renovate looks those pins up on `public.ecr.aws` and proposes digest updates.
 
-## Blocked Certificates
-
-The images rely on the `blocked.certs` shipped by Corretto. The image tests check that the JVM rejects a compromised eMudhra intermediate CA (CVE-2026-91403, blocked upstream in [openjdk/jdk@22bc7357ce](https://github.com/openjdk/jdk/commit/22bc7357ce) and shipped in Corretto 17.0.21, 21.0.13 and 25.0.5), so a base image without that fix fails CI.
-
 ## Memory Allocator Performance
 
 ### When to Use Each Variant
