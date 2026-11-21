@@ -27,9 +27,9 @@ VERSIONS = 17-al2023 21-al2023 25-al2023
 ECR_MIRROR ?= 232933512461.dkr.ecr.eu-west-2.amazonaws.com/thirdparty/ecr-public
 
 # Base image pins with digests (Renovate bumps digests here, looking them up on public.ecr.aws)
-CORRETTO_17_AL2023 = $(ECR_MIRROR)/amazoncorretto/amazoncorretto:17.0.21-al2023@sha256:f584b538cc7d11404bbba862fdc869e1914ae68ab318354887feab8fcd120044
-CORRETTO_21_AL2023 = $(ECR_MIRROR)/amazoncorretto/amazoncorretto:21.0.13-al2023@sha256:2c18df9ab25d057833f9eb70893b580e137ebd7d4519f8f3a4df2648331f8191
-CORRETTO_25_AL2023 = $(ECR_MIRROR)/amazoncorretto/amazoncorretto:25.0.5-al2023@sha256:94fb7e965c19e869ebe62d9a0ab40d3809bda66713065d40366217b3d8f96907
+CORRETTO_17_AL2023 = $(ECR_MIRROR)/amazoncorretto/amazoncorretto:17.0.21-al2023@sha256:cb0b0e2f5501a9c0671d5a7781945e73da87e00514bdd8ecaeeee51bb0a7e8d8
+CORRETTO_21_AL2023 = $(ECR_MIRROR)/amazoncorretto/amazoncorretto:21.0.13-al2023@sha256:4d861b84f93fc8dfb4943686234f485c8d708bf36d88a45a61175d2663b66f38
+CORRETTO_25_AL2023 = $(ECR_MIRROR)/amazoncorretto/amazoncorretto:25.0.5-al2023@sha256:43d3500b3107ad1a4ed39a027c40aaed5bb1b33e74543ea9fde611ea226abb38
 
 # Map version to base image (used when version= is set)
 base_image_17-al2023 = $(CORRETTO_17_AL2023)
